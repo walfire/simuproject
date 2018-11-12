@@ -13,6 +13,7 @@ class Agent:
     knowngames = {}
     preferences = {}
     #more..
+    #ababababababababbabbu
 
 
 class Person(Agent):    #check on https://www.python-course.eu/python3_inheritance.php 
