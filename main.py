@@ -3,14 +3,42 @@
 ###Libraries###
 import numpy as np
 import networkx as nx 
-
+import numpy.random as rng
 #### CLASSES ####
 
 #written in PSEUDOCODE
 #bububububububu
-
+n=1000
 #### NETWORK STRUCTURE ####
-
+class Network(object):
+    def __init__(self, size=n):
+        self.size=size
+        self.mean=0
+        self.sd=0
+        self.dist=0
+        self.type=0
+        self.agents=[]
+        self.inf=[]
+        self.gf=nx.Graph()
+        self.ginf=nx.DiGraph()
+    def generate(self,meanfriends=10, sdfriends=5, frienddist="uni",connectdist="CStyle"):
+        for a in range(self.size):
+            friends=[]
+            tar=["r"]
+            if frienddist=="uni":
+                numf=rng.uniform()
+                numf=numf*meanfriends*2//1
+                numf=int(numf)
+            if connectdist=="CStyle":
+                for a in range(numf):
+                    nex=rng.choice(tar)
+                    if nex=="r" or nex in friends+["r",a]:
+                        while nex in friends+["r",a]:
+                            nex=rng.choice(range(self.size))
+                    self.gf.add_edge(a,nex)
+                    tar=tar+list(self.gf[nex])
+                    friends.append(nex)
+    
 class Agent:
     friends = []
     #aiiaiaiiaiai
