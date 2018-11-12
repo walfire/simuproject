@@ -75,6 +75,7 @@ class Conversionalgo:
 
 #### SIMULATION MANAGER ####
 #testforbranch
+#secondtest
 class Simumanager:
     def networkinit():      #Setup
         pass
