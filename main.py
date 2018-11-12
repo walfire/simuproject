@@ -1,5 +1,8 @@
 #### SIMU PROJECT ####
 
+###Libraries###
+import numpy as np
+import networkx as nx 
 
 #### CLASSES ####
 
