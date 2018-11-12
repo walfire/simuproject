@@ -3,6 +3,8 @@
 ###Libraries###
 import numpy as np
 import networkx as nx 
+import tkinter as tk
+
 
 #### CLASSES ####
 
@@ -83,28 +85,35 @@ class Conversionalgo:
 #### SIMULATION MANAGER ####
 
 class Simumanager:
-    def networkinit():      #Setup
+    'class that manages the simulation, works with timestamps'
+    timeStamp = 0   #accessable from in/outside the class
+    
+    
+    def __init__(self):
         pass
-    def networkfillup():
+
+    def networkinit(self):      #Setup
         pass
-    def influencernetworkcreation():
+    def networkfillup(self):
         pass
-    def setupcamesparam():
+    def influencernetworkcreation(self):
         pass
-    def fillupknowngames():
+    def setupcamesparam(self):
+        pass
+    def fillupknowngames(self):
         pass
     
-    def stateofknowngame():     #1 Timestamp
+    def stateofknowngame(self):     #1 Timestamp
         pass
-    def decay():
+    def decay(self):
         pass
-    def ad():
+    def ad(self):
         pass
-    def influ():
+    def influ(self):
         pass
-    def friend():
+    def friend(self):
         pass
-    def convalgo():
+    def convalgo(self):
         pass
     
 #### DATA MANAGER ####
