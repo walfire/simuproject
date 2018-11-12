@@ -14,7 +14,6 @@ class Agent:
     preferences = {}
     #more..
 
-#asdfghjkl
 
 class Person(Agent):    #check on https://www.python-course.eu/python3_inheritance.php 
     pass                   #for inherited classes
