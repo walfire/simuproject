@@ -10,6 +10,7 @@
 
 class Agent:
     friends = []
+    #aiiaiaiiaiai
     knowngames = {}
     preferences = {}
     #more..
