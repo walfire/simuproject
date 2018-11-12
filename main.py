@@ -1,5 +1,8 @@
 #### SIMU PROJECT ####
 
+###Libraries###
+import numpy as np
+import networkx as nx 
 
 #### CLASSES ####
 
@@ -11,12 +14,13 @@
 class Agent:
     friends = []
     #aiiaiaiiaiai
+    #jijijijijijij
+    #r
     knowngames = {}
     preferences = {}
     #more..
     #ababababababababbabbu
 
-#asdfghjkl
 
 class Person(Agent):    #check on https://www.python-course.eu/python3_inheritance.php 
     pass                   #for inherited classes
