@@ -32,7 +32,7 @@ class Network(object):
             tar=["r"]
             if frienddist=="uni":
                 numf=rng.uniform()
-                numf=numf*meanfriends//1
+                numf=numf*meanfriends//1+5
                 print(numf)
                 numf=int(numf)
             if connectdist=="CStyle":
@@ -46,8 +46,10 @@ class Network(object):
                     friends.append(nex)
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
-    def getobf(self,personnr):
+    def getobj(self,personnr):
         return self.gf.nodes[personnr][obj]
+    def draw(self):
+        nx.draw(self.gf)
     
 class Agent:
     friends = []
