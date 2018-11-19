@@ -4,11 +4,15 @@
 import numpy as np
 import networkx as nx 
 import numpy.random as rng
+import tkinter as tk
+import random
+
 #### CLASSES ####
 
-#written in PSEUDOCODE
-#bububububububu
-n=100
+#### NETWORK STRUCTURE ####
+
+n=1000
+
 #### NETWORK STRUCTURE ####
 class Network(object):
     def __init__(self, size=n):
@@ -51,46 +55,85 @@ class Network(object):
     def draw(self):
         nx.draw(self.gf)
     
-class Agent:
-    friends = []
-    #aiiaiaiiaiai
-    #jijijijijijij
-    #r
-    knowngames = {}
-    preferences = {}
-    #more..
-    #ababababababababbabbu
+#### AGENTS ####
 
+people_total = []
+friendship_prob = 0.3
+influencer_prob = 0.3
+advertising_power = 0.3
+comparison_budget = 1000
 
-class Person(Agent):    #check on https://www.python-course.eu/python3_inheritance.php 
-    pass                   #for inherited classes
+class Agent:      
+    def __init__(self,node_num, friend_list):
+        self.node_num = node_num
+        self.friends = friend_list
+        self.knowngames = {}
+        self.preferences = {}
+        self.now_playing = 0
+        
+    def add_friends(self, person):
+        self.friends.append(person)
     
+    def add_knowngames(self, game, pref=0):
+        self.knowngames[game] = pref
     
+    def define_preferences(self,likes:dict):
+        self.preferences=likes
+        
+    def get_friends(self):
+        return self.friends 
+    
+    def get_knowngames(self):
+        return self.knowngames
+    
+    def get_preferences(self):
+        return self.preferences
+    
+    def influence_playing(self,key,prob):
+        self.knowngames[key] += prob
+    
+    def recommend(self):
+        for i in self.friends:
+            i.influence_playing(self.now_playing,friendship_prob)
+        
+    def game_infection(self):
+        for game in sorted(self.knowngames, key=self.knowngames.get, reverse=True):
+            prob=self.knowngames[game] 
+            if random.choice([0,1],[1-prob,prob]):
+                self.now_playing = game
+       
 class Influencer(Agent):
-    followers = []
+    def __init__(self):
+        self.friends = []
+        self.knowngames = {}
+        self.preferences = {}
+        self.followers = []
+        
+    def add_followers(self,person):
+        self.followers.append(person)
+        
+    def recommend(self):
+        for i in self.followers:
+            i.influence_playing(self.now_playing,influencer_prob)
+        for i in self.friends:
+            i.influence_playing(self.now_playing,friendship_prob)
     
     
 #### EFFECTS ON PREFERENCE ####
     
 class Advertisement:
-    def effectonperson():
-        pass
-    def effectoninfluencer():
-        pass
-    #more?
-    
-class Influencersinfluence:
-    def effectonfollowers():
-        pass
-    #more?
-
-
-class Friendsinfluence:
-    def effectonfriends():
-        pass
-    #more?
-    
-
+    def __init__(self, game, budget):
+        self.game = game
+        self.budget = budget
+        self.effect = advertising_power*self.budget/comparison_budget
+        
+    def get_effect(self):
+        return self.effect   
+     
+    def run_add(self):
+        for i in people_total:
+            i.influence_playing(self.game, self.effect)
+            
 #### GAME ####
     
     
@@ -121,31 +164,37 @@ class Conversionalgo:
     #more?
 
 #### SIMULATION MANAGER ####
-#testforbranch
-#secondtest
+
 class Simumanager:
-    def networkinit():      #Setup
+    'class that manages the simulation, works with timestamps'
+    timeStamp = 0   #accessable from in/outside the class
+    
+    
+    def __init__(self):
         pass
-    def networkfillup():
+
+    def networkinit(self):      #Setup
         pass
-    def influencernetworkcreation():
+    def networkfillup(self):
         pass
-    def setupcamesparam():
+    def influencernetworkcreation(self):
         pass
-    def fillupknowngames():
+    def setupcamesparam(self):
+        pass
+    def fillupknowngames(self):
         pass
     
-    def stateofknowngame():     #1 Timestamp
+    def stateofknowngame(self):     #1 Timestamp
         pass
-    def decay():
+    def decay(self):
         pass
-    def ad():
+    def ad(self):
         pass
-    def influ():
+    def influ(self):
         pass
-    def friend():
+    def friend(self):
         pass
-    def convalgo():
+    def convalgo(self):
         pass
     
 #### DATA MANAGER ####
