@@ -1,92 +1,95 @@
 #### SIMU PROJECT ####
 
-
+###Libraries###
+import numpy as np
+import networkx as nx 
+import numpy.random as rng
 #### CLASSES ####
 
-
-
+#written in PSEUDOCODE
+#bububububububu
+n=100
 #### NETWORK STRUCTURE ####
-import random
+class Network(object):
+    def __init__(self, size=n):
+        self.size=size
+        self.mean=0
+        self.sd=0
+        self.dist=0
+        self.type=0
+        self.agents=[]
+        self.inf=[]
+        self.gf=nx.Graph()
+        self.ginf=nx.DiGraph()
+    def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="CStyle"):
+        for a in range(self.size):
+            #
+            
+            #self.gf.add_node(a,obj=______object_____)
+            
+            #
+            friends=[]
+            tar=["r"]
+            if frienddist=="uni":
+                numf=rng.uniform()
+                numf=numf*meanfriends//1+5
+                print(numf)
+                numf=int(numf)
+            if connectdist=="CStyle":
+                for a in range(numf):
+                    nex=rng.choice(tar)
+                    if nex=="r" or nex in friends+["r",a]:
+                        while nex in friends+["r",a]:
+                            nex=rng.choice(range(self.size))
+                    self.gf.add_edge(a,nex)
+                    tar=tar+list(self.gf[nex])
+                    friends.append(nex)
+    def friendsof(self,personnr):
+        return(list(self.gf[personnr]))
+    def getobj(self,personnr):
+        return self.gf.nodes[personnr][obj]
+    def draw(self):
+        nx.draw(self.gf)
+    
+class Agent:
+    friends = []
+    #aiiaiaiiaiai
+    #jijijijijijij
+    #r
+    knowngames = {}
+    preferences = {}
+    #more..
+    #ababababababababbabbu
 
-people_total = []
 
-class Agent:    
+class Person(Agent):    #check on https://www.python-course.eu/python3_inheritance.php 
+    pass                   #for inherited classes
     
-    friendship_prob = 0.3
     
-    def __init__(self,node_num, friend_list):
-        self.node_num = node_num
-        self.friends = friend_list
-        self.knowngames = {}
-        self.preferences = {}
-        self.now_playing = 0
-        
-    def add_friends(self, person):
-        self.friends.append(person)
-    
-    def add_knowngames(self, game, pref=0):
-        self.knowngames[game] = pref
-    
-    def define_preferences(self,likes:dict):
-        self.preferences=likes
-        
-    def get_friends(self):
-        return self.friends 
-    
-    def get_knowngames(self):
-        return self.knowngames
-    
-    def get_preferences(self):
-        return self.preferences
-    
-    def influence_playing(self,key,prob):
-        self.knowngames[key] += prob
-    
-    def recommend():
-        for i in self.friends:
-            i.influence_playing(self.now_playing,friendship_prob)
-        
-    def game_infection(self):
-        for game in sorted(self.knowngames, key=self.knowngames.get, reverse=True):
-            prob=knowngames[game] 
-            if random.choice([0,1],[1-prob,prob]):
-                self.now_playing = game
-       
 class Influencer(Agent):
-    influencer_prob = 0.3
-    def __init__(self):
-        self.friends = []
-        self.knowngames = {}
-        self.preferences = {}
-        self.followers = []
-        
-    def add_followers(self,person):
-        self.followers.append(person)
-        
-    def recommend():
-        for i in self.followers:
-            i.influence_playing(self.now_playing,influencer_prob)
-        for i in self.friends:
-            i.influence_playing(self.now_playing,friendship_prob)
+    followers = []
     
     
 #### EFFECTS ON PREFERENCE ####
     
 class Advertisement:
-    comparison_budget = 1000
-    advertising_power = 0.3
-    def __init__(self, game, budget):
-        self.game = game
-        self.budget = budget
-        self.effect = advertising_power*self.budget/comparison.budget
-        
-    def get_effect(self):
-        return self.effect   
-     
-    def run_add():
-        for i in people_total:
-            i.influence_playing(self.game, self.effect)
-        
+    def effectonperson():
+        pass
+    def effectoninfluencer():
+        pass
+    #more?
+    
+class Influencersinfluence:
+    def effectonfollowers():
+        pass
+    #more?
+
+
+class Friendsinfluence:
+    def effectonfriends():
+        pass
+    #more?
+    
 
 #### GAME ####
     
@@ -118,7 +121,8 @@ class Conversionalgo:
     #more?
 
 #### SIMULATION MANAGER ####
-
+#testforbranch
+#secondtest
 class Simumanager:
     def networkinit():      #Setup
         pass
