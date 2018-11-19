@@ -21,7 +21,7 @@ class Network(object):
         self.inf=[]
         self.gf=nx.Graph()
         self.ginf=nx.DiGraph()
-    def generate(self,meanfriends=10, sdfriends=5, frienddist="uni",connectdist="CStyle"):
+    def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="CStyle"):
         for a in range(self.size):
             #
             
