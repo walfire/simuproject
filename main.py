@@ -21,32 +21,32 @@ class Agent:
         self.preferences = {}
         self.now_playing = 0
         
-    def self.add_friends(self, person):
+    def add_friends(self, person):
         self.friends.append(person)
     
-    def self.add_knowngames(self, game, pref=0):
+    def add_knowngames(self, game, pref=0):
         self.knowngames[game] = pref
     
-    def self.define_preferences(self,likes:dict):
+    def define_preferences(self,likes:dict):
         self.preferences=likes
         
-    def self.get_friends(self):
+    def get_friends(self):
         return self.friends 
     
-    def self.get_knowngames(self):
+    def get_knowngames(self):
         return self.knowngames
     
-    def self.get_preferences(self):
+    def get_preferences(self):
         return self.preferences
     
-    def self.influence_playing(self,key,prob):
+    def influence_playing(self,key,prob):
         self.knowngames[key] += prob
     
-    def self.recommend():
+    def recommend():
         for i in self.friends:
             i.influence_playing(self.now_playing,friendship_prob)
         
-    def self.game_infection(self):
+    def game_infection(self):
         for game in sorted(self.knowngames, key=self.knowngames.get, reverse=True):
             prob=knowngames[game] 
             if random.choice([0,1],[1-prob,prob]):
@@ -60,10 +60,10 @@ class Influencer(Agent):
         self.preferences = {}
         self.followers = []
         
-    def self.add_followers(self,person):
+    def add_followers(self,person):
         self.followers.append(person)
         
-    def self.recommend():
+    def recommend():
         for i in self.followers:
             i.influence_playing(self.now_playing,influencer_prob)
         for i in self.friends:
@@ -80,10 +80,10 @@ class Advertisement:
         self.budget = budget
         self.effect = advertising_power*self.budget/comparison.budget
         
-    def self.get_effect(self):
+    def get_effect(self):
         return self.effect   
      
-    def self.run_add():
+    def run_add():
         for i in people_total:
             i.influence_playing(self.game, self.effect)
         
