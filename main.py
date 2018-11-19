@@ -8,7 +8,7 @@ import numpy.random as rng
 
 #written in PSEUDOCODE
 #bububububububu
-n=1000
+n=100
 #### NETWORK STRUCTURE ####
 class Network(object):
     def __init__(self, size=n):
@@ -23,11 +23,17 @@ class Network(object):
         self.ginf=nx.DiGraph()
     def generate(self,meanfriends=10, sdfriends=5, frienddist="uni",connectdist="CStyle"):
         for a in range(self.size):
+            #
+            
+            #self.gf.add_node(a,obj=______object_____)
+            
+            #
             friends=[]
             tar=["r"]
             if frienddist=="uni":
                 numf=rng.uniform()
-                numf=numf*meanfriends*2//1
+                numf=numf*meanfriends//1
+                print(numf)
                 numf=int(numf)
             if connectdist=="CStyle":
                 for a in range(numf):
@@ -38,6 +44,10 @@ class Network(object):
                     self.gf.add_edge(a,nex)
                     tar=tar+list(self.gf[nex])
                     friends.append(nex)
+    def friendsof(self,personnr):
+        return(list(self.gf[personnr]))
+    def getobf(self,personnr):
+        return self.gf.nodes[personnr][obj]
     
 class Agent:
     friends = []
