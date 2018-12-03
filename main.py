@@ -3,7 +3,7 @@
 ###Libraries###
 import numpy as np
 import networkx as nx 
-import tkinter as tk
+import Tkinter as tk
 
 
 #### CLASSES ####
@@ -84,21 +84,43 @@ class Conversionalgo:
 
 #### SIMULATION MANAGER ####
 
+#https://www.tutorialspoint.com/python/python_classes_objects.htm
+#https://likegeeks.com/python-gui-examples-tkinter-tutorial/
+
 class Simumanager:
-    'class that manages the simulation, works with timestamps'
+    'class that manages the simulation & works with timestamps'
     timeStamp = 0   #accessable from in/outside the class
     
+    def quitsimu(self):
+        self.window.destroy()
+        
+    
+    window = tk.Tk()                    #GUI of the simumanager
+    window.title("Simulation Manager")
+    window.geometry('800x600')
+    
+    quitbutton = tk.Button(window, text="Quit", command = quitsimu())
+    quitbutton.grid(column=100, row=100)
+    
+    window.mainloop()
     
     def __init__(self):
-        pass
+        Simumanager.timeStamp = 0 #init the timestamp to 0 for a new simulation
+        
+        
+    
 
+
+    def loadsimu(self, timestamp, datafile):
+        Simumanager.timeStamp = timestamp
+        
     def networkinit(self):      #Setup
         pass
     def networkfillup(self):
         pass
     def influencernetworkcreation(self):
         pass
-    def setupcamesparam(self):
+    def setupgamesparam(self):
         pass
     def fillupknowngames(self):
         pass
@@ -141,3 +163,4 @@ class plotter:
     #more?
     
     
+Simumanager()
