@@ -11,7 +11,7 @@ import random
 
 #### NETWORK STRUCTURE ####
 
-n=1000
+n=100
 
 #### NETWORK STRUCTURE ####
 class Network(object):
@@ -25,36 +25,128 @@ class Network(object):
         self.inf=[]
         self.gf=nx.Graph()
         self.ginf=nx.DiGraph()
+        self.infperag=1
+        self.numinf=10
     def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="CStyle"):
         for a in range(self.size):
-            #
-            
-            #self.gf.add_node(a,obj=______object_____)
-            
-            #
-            friends=[]
-            tar=["r"]
-            if frienddist=="uni":
-                numf=rng.uniform()
-                numf=numf*meanfriends//1+5
-                print(numf)
-                numf=int(numf)
-            if connectdist=="CStyle":
-                for a in range(numf):
-                    nex=rng.choice(tar)
-                    if nex=="r" or nex in friends+["r",a]:
-                        while nex in friends+["r",a]:
-                            nex=rng.choice(range(self.size))
-                    self.gf.add_edge(a,nex)
-                    tar=tar+list(self.gf[nex])
-                    friends.append(nex)
+            self.gf.add_node(a,obj="______object_____")
+        if connectdist=="CStyle":
+            for a in range(self.size):
+                #
+                
+                #self.gf.add_node(a,obj=______object_____)
+                
+                #
+                tar=["r"]
+                friends=[]
+                for b in list(self.gf[a]):
+                    friends.append(b)
+                    for c in list(self.gf[b]):
+                        tar.append(c)
+                    
+                
+                if frienddist=="uni":
+                    #numf=rng.uniform()
+                    #numf=numf*meanfriends//1+5
+                    numf=10
+                    #numf=15-len(friends)
+                    #if numf <0:
+                     #   numf=1
+                    numf=int(numf)
+                if connectdist=="CStyle":
+                    for aa in range(numf):
+                        nex=rng.choice(tar)
+                        if nex=="r" or int(nex) in friends+["r",a]:
+                            while nex in friends+["r",a] or int(nex) in friends+["r",a]:
+                                nex=int(rng.choice(range(self.size)))
+                        nex=int(nex)
+                        self.gf.add_edge(a,int(nex))
+                        tar=tar+list(self.gf[nex])
+                        friends.append(nex)
+                if len(self.gf[a])<5:
+                    print(a)
+                    print(friends)
+                    print(self.gf[a])
+                    print(" \n")
+        if connectdist=="randomunif":
+            #notperfect
+            numf=10
+            connect={k:[] for k in range(self.size)}
+            li=[]
+            for a in range(self.size-1):
+                it=0
+                while len(connect[a])<numf and it<100:
+                    it+=1
+                    r=rng.choice(range(a+1,self.size))
+                    if len(connect[r])<10 or r in connect[a]:
+                        #print(a,r)
+                        li.append([int(a),int(r)])
+                        connect[a].append(r)
+                        connect[r].append(a)
+                print(a,it,len(connect[a]))
+            print(len(li))
+            for b,c in li:    
+                self.gf.add_edge(b,c)
+                #gnm_random_graph(n, m, seed=None, directed=False)
+                #connected_watts_strogatz_graph(n, k, p[, ...])
+            #if len(self.gf[a])<5:
+             #   print(a)
+              #  print(friends)
+               # print(self.gf[a])
+                #print(" \n")
+        if connectdist=="randomunif2":
+            al=[]
+            numf=10
+            for a in range(numf):
+                al=al+list(range(self.size))
+            con=[]
+            al2=al
+            rng.shuffle(al2)
+            it=0
+            while it<10000:
+                it+=1
+                if len(al2)>=1:
+                    cand=al2[:2]
+                    if cand[0]!=cand[1] and cand not in con and cand[::-1] not in con:
+                        con.append(frozenset(al2[:2]))
+                        al2=al2[2:]
+                    else:
+                        rng.shuffle(al2)
+                else:
+                    break
+            print(con,len(con),len(set(con)),it)
+            for b,c in con:    
+                self.gf.add_edge(b,c)
+        if connectdist=="prederd":
+            n=self.size
+            k=10/(n-1)
+            te=nx.gnp_random_graph(n,k)
+            print(te.edges)
+                #dic={}
+                #for a in range(self.size):
+                #    dic[a]=self.gf.nodes[a][obj]
+                #nx.set_node_attributes(te,dic,"obj")                    
+                #self.gf=te  
+            self.gf.add_edges_from(te.edges)
+                
+                
+                #karate_club_graph()
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
     def getobj(self,personnr):
         return self.gf.nodes[personnr][obj]
     def draw(self):
         nx.draw(self.gf)
-    
+    def addinf(self):
+        #choose numinf randomagents as infs
+        #loop over agents 
+        # generate score for each inf according to taste similarity
+        # chose infperag ones according to score
+        pass
+        #probably output a dic of ags per inf, but also add inf as a trait of ag
+        
+        
+
 #### AGENTS ####
 
 people_total = []
