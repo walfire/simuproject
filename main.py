@@ -12,6 +12,7 @@ import random
 #### NETWORK STRUCTURE ####
 
 n=100
+keys=["complex" , "friendly" , "meaning","polish" , "multi", "action", "difficulty", "abstract"]
 
 #### NETWORK STRUCTURE ####
 class Network(object):
