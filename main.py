@@ -128,7 +128,55 @@ class Network(object):
                 #nx.set_node_attributes(te,dic,"obj")                    
                 #self.gf=te  
             self.gf.add_edges_from(te.edges)
+        if connectdist=="watstro":
+            n=self.size
+            p=0.2
+            k=10
+            te=nx.connected_watts_strogatz_graph(n,k,p,100)
+                #dic={}
+                #for a in range(self.size):
+                #    dic[a]=self.gf.nodes[a][obj]
+                #nx.set_node_attributes(te,dic,"obj")                    
+                #self.gf=te  
+            self.gf.add_edges_from(te.edges)
+        if connectdist=="full":
+            n=self.size
+            e=[]
+            for a in range(n-1):
+                for b in range(a+1,n):
+                    e.append(set([a,b]))
+                #dic={}
+                #for a in range(self.size):
+                #    dic[a]=self.gf.nodes[a][obj]
+                #nx.set_node_attributes(te,dic,"obj")                    
+                #self.gf=te  
+            self.gf.add_edges_from(e)
                 
+                
+                #karate_club_graph()
+        if connectdist=="star":
+            n=self.size
+            e=[]
+            for a in range(n):
+                e.append([a,(n+1)%n])
+                #dic={}
+                #for a in range(self.size):
+                #    dic[a]=self.gf.nodes[a][obj]
+                #nx.set_node_attributes(te,dic,"obj")                    
+                #self.gf=te  
+            self.gf.add_edges_from(e)
+        if connectdist=="circle":
+            n=self.size
+            e=[]
+            for a in range(n):
+                e.append([a,(a+1)%n])
+                #dic={}
+                #for a in range(self.size):
+                #    dic[a]=self.gf.nodes[a][obj]
+                #nx.set_node_attributes(te,dic,"obj")                    
+                #self.gf=te  
+            self.gf.add_edges_from(e)
+                        
                 
                 #karate_club_graph()
     def friendsof(self,personnr):
