@@ -58,7 +58,7 @@ class Network(object):
                 if frienddist=="uni":
                     #numf=rng.uniform()
                     #numf=numf*meanfriends//1+5
-                    numf=10
+                    numf=5
                     #numf=15-len(friends)
                     #if numf <0:
                      #   numf=1
@@ -206,7 +206,7 @@ class Network(object):
         
         inf=random.sample(self.gf.nodes,ninf)
         for a in inf:
-            self.infobj.append(self.getobj[a])
+            self.infobj.append(self.getobj(a))
         watchers=self.agentsid
         for a in range(self.size):
             self.ginf.add_node(a,obj=self.getobj(a))
@@ -263,7 +263,7 @@ class Network(object):
             infdic[inf[nu]].append(a)
             self.ginf.add_edge(a,inf[nu])
         self.infdic=infdic
-        for a in self.infdic.keys:
+        for a in self.infdic.keys():
             self.getobj(a).add_followers(self.infdic[a])        
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
