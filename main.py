@@ -20,14 +20,17 @@ class Network(object):
         self.size=size
         self.mean=0
         self.sd=0
+        self.watchers=[]
         self.dist=0
         self.type=0
+        self.agentsid=[]
         self.agents=[]
         self.inf=[]
         self.gf=nx.Graph()
         self.ginf=nx.DiGraph()
         self.infperag=1
         self.numinf=10
+        self.infdic={}
     def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="CStyle"):
         for a in range(self.size):
             self.gf.add_node(a,obj=Person(a))
@@ -180,6 +183,41 @@ class Network(object):
                         
                 
                 #karate_club_graph()
+        self.agentsid=self.gf.nodes
+        for a in self.agentsid:
+            self.agents.append(self.getobj(a))
+    def setup(self, genway="random"):
+        pref={}
+        for a in keys:
+            pref[a]=0
+        for a in self.gf.nodes():
+            dic=pref
+            for b in keys:
+                dic[b]=rng.random()
+            self.getobj(a).define_preferences(dic):
+                
+        ninf=5
+        
+        inf=random.sample(self.gf.nodes,ninf)
+        watchers=self.agentsid
+        for a in range(self.size):
+            self.ginf.add_node(a,obj=Person(a))
+        infdic={}
+        for a in inf:
+            infdic[inf]=[]
+        if genway="random":
+            for a in watchers:
+                b=random.choice(inf)
+                infdic[b].append(a)
+                self.ginf.add_edge(b,a)
+        if genway="stricttaste":
+            for a in watchers:
+                pref=self.getobj(a).preferences
+                sco=-100000000000
+                for b in inf:
+                    inpref=self.getobj
+        self.infic=infdic
+            
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
     def getobj(self,personnr):
