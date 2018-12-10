@@ -205,18 +205,18 @@ class Network(object):
         infdic={}
         for a in inf:
             infdic[inf]=[]
-        if genway="random":
+        if genway=="random":
             for a in watchers:
                 b=random.choice(inf)
                 infdic[b].append(a)
                 self.ginf.add_edge(b,a)
-        if genway="stricttaste":
+        if genway=="stricttaste":
             for a in watchers:
                 pref=self.getobj(a).preferences
                 sco=-100000000000
                 for b in inf:
                     inpref=self.getobj
-        self.infic=infdic
+        self.infdic=infdic
             
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
@@ -237,47 +237,58 @@ class Network(object):
 #### AGENTS ####
 
 people_total = [] #list of person objects
+games_total = [] #list of game objects
 friendship_prob = 0.3
 influencer_prob = 0.3
 advertising_power = 0.3
+standard_decay = -0.3
+decay_multiplier =0.2
 comparison_budget = 1000
-likes = [singleplayer, multiplayer, casual, replayable, rpg]
-genres = [fps, puzzle, strategy, platformer, sim]
+
+#likes = [singleplayer, multiplayer, casual, replayable, rpg]
+#genres = [fps, puzzle, strategy, platformer, sim]
 
 
 class Agent:      
     def __init__(self,node_num):
         self.node_num = node_num
         self.friends = []
+        self.followers = []
         self.knowngames = {}
         self.preferences = {}
         self.now_playing = 0
+        self.time_playing = 0
+        self.influencer_status = False
         
-    def define_friends(self, liste):
-        self.friends = liste
+    def define_friends(self, friends_list):
+        self.friends = friends_list
+        
+    def define_followers(self, followers_list):
+        self.followers = followers_list
+        self.influencer_status = True
         
     def define_knowngames(self, games_dict):
         self.knowngames = games_dict
     
-    def add_knowngames(self, game, pref=0):
-        self.knowngames[game] = pref
-    
-    def set_preferences(self,likes:list):
-        self.preferences_list=likes
+#    def set_preferences(self,likes:list):
+#        self.preferences_list=likes
         
     def define_preferences(self, scores = [], pref_dict ={}):
         if pref_dict:
             self.preferences = pref_dict
-        else:
-            if scores:
-                for i in range(len(scores)):
-                    self.preferences[self.preferences_list[i]]=scores[i]
-            for item in self.preferences_list:
-                if item not in self.preferences:
-                    self.preferences[item]= 0
+#        else:
+#            if scores:
+#                for i in range(len(scores)):
+#                    self.preferences[self.preferences_list[i]]=scores[i]
+#            for item in self.preferences_list:
+#                if item not in self.preferences:
+#                    self.preferences[item]= 0
         
     def get_friends(self):
-        return self.friends 
+        return self.friends
+    
+    def get_followers(self):
+        return self.followers
     
     def get_knowngames(self):
         return self.knowngames
@@ -291,31 +302,24 @@ class Agent:
     def recommend(self):
         for i in self.friends:
             i.influence_playing(self.now_playing,friendship_prob)
+        if self.followers:
+            for i in self.followers:
+                i.influence_playing(self.now_playing,influencer_prob)
         
     def game_infection(self):
         for game in sorted(self.knowngames, key=self.knowngames.get, reverse=True):
             prob=self.knowngames[game] 
             if random.choice([0,1],[1-prob,prob]):
                 self.now_playing = game
+                self.time_playing +=1
                 #return True
                 break
+    
+#    def decay_effect(self):
+#        if self.now_playing:
+#            disinterest =self.time_playing*self.now_playing
+#            self.influence_playing(self.now_playing, disinterest)
    
-    
-class Influencer(Agent):
-    def __init__(self):
-        Agent.__init__()
-        self.followers = []
-        
-    def add_followers(self,person):
-        self.followers.append(person)
-        
-    def recommend(self):
-        for i in self.followers:
-            i.influence_playing(self.now_playing,influencer_prob)
-        for i in self.friends:
-            i.influence_playing(self.now_playing,friendship_prob)
-
-    
     
 class Game:
 #    decay = 0
@@ -342,24 +346,53 @@ class Game:
         self.popularity = players/len(people)
         return self.popularity
     
+    def get_totalplayers(self, people=people_total):
+        players = 0
+        for i in people:
+            if self.name == i.now_playing:
+                players += 1
+        return players
+    
     def run_add(self, people=people_total):
         for i in people:
             i.influence_playing(self.game, self.effect)
     
-    def define scores(self, scores_list)
+    def define_scores(self, keys=likes, scores_list=[], scores_dic={}):
+        if scores_dic:
+            self.scores = scores_dic
+        elif scores_list:
+            for i in range(len(scores_list)):
+                self.scores[keys[i]]=scores_list[i]
+        for item in keys:
+            if item not in self.scores:
+                self.scores[item] = 0
+    
+    def set_decay(self, value=standard_decay):
+        self.decay = value
+    
     
     
     
 #### CONVERSION ALGORITHM ####
     
 class Conversionalgo:
-    def findpercent():
-        pass
-    def activeagent():
-        pass
-    def passiveagent():
-        pass
-    def decidegameplayed():
+    def __init__(self, step_num=0):
+        self.counter = step_num
+        self.currentstatus = {}
+        
+    def implement_influence(self):
+        for item in games_total:
+            item.run_add()
+        for person in people_total:
+            person.recommend()
+        for person in people_total:
+            person.game_infection()
+    
+    def get_currentstatus(self):
+        for item in games_total:
+            self.currentstatus[str(item)] = item.get_totalplayers()
+        
+    def get_deltas(self):
         pass
     #more?
 
