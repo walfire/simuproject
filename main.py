@@ -57,28 +57,46 @@ class Network(object):
     
 #### AGENTS ####
 
-people_total = []
+people_total = [] #list of person objects
 friendship_prob = 0.3
 influencer_prob = 0.3
 advertising_power = 0.3
 comparison_budget = 1000
+likes = [singleplayer, multiplayer, casual, replayable, rpg]
+genres = [fps, puzzle, strategy, platformer, sim]
 
-class Agent:      
-    def __init__(self,node_num, friend_list):
+# influences methods: agents.recommend() game.run_add()
+
+class Person:      
+    def __init__(self,node_num):
         self.node_num = node_num
-        self.friends = friend_list
+        self.friends = []
         self.knowngames = {}
         self.preferences = {}
         self.now_playing = 0
         
-    def add_friends(self, person):
-        self.friends.append(person)
+    def define_friends(self, liste):
+        self.friends = liste
+        
+    def define_knowngames(self, games_dict):
+        self.knowngames = games_dict
     
     def add_knowngames(self, game, pref=0):
         self.knowngames[game] = pref
     
-    def define_preferences(self,likes:dict):
-        self.preferences=likes
+    def set_preferences(self,likes:list):
+        self.preferences_list=likes
+        
+    def define_preferences(self, scores = [], pref_dict ={}):
+        if pref_dict:
+            self.preferences = pref_dict
+        else:
+            if scores:
+                for i in range(len(scores)):
+                    self.preferences[self.preferences_list[i]]=scores[i]
+            for item in self.preferences_list:
+                if item not in self.preferences:
+                    self.preferences[item]= 0
         
     def get_friends(self):
         return self.friends 
@@ -101,12 +119,13 @@ class Agent:
             prob=self.knowngames[game] 
             if random.choice([0,1],[1-prob,prob]):
                 self.now_playing = game
-       
+                #return True
+                break
+   
+    
 class Influencer(Agent):
     def __init__(self):
-        self.friends = []
-        self.knowngames = {}
-        self.preferences = {}
+        Agent.__init__()
         self.followers = []
         
     def add_followers(self,person):
@@ -117,36 +136,39 @@ class Influencer(Agent):
             i.influence_playing(self.now_playing,influencer_prob)
         for i in self.friends:
             i.influence_playing(self.now_playing,friendship_prob)
-    
-    
-#### EFFECTS ON PREFERENCE ####
-    
-class Advertisement:
-    def __init__(self, game, budget):
-        self.game = game
-        self.budget = budget
-        self.effect = advertising_power*self.budget/comparison_budget
-        
-    def get_effect(self):
-        return self.effect   
-     
-    def run_add(self):
-        for i in people_total:
-            i.influence_playing(self.game, self.effect)
-            
-#### GAME ####
+
     
     
 class Game:
-    decay = 0
-    popularity = 0.0
-    budget = 0.0
-    multiplayer = 0.0
-    singleplayer = 0.0
-    mainstream = 0.0
-    target = 0.0 #niche - mainstream
-    team = ["indie","blockbuster"] #optional?
-    #more?
+#    decay = 0
+#    popularity = 0.0
+#    budget = 0.0
+#    multiplayer = 0.0
+#    singleplayer = 0.0
+#    mainstream = 0.0
+#    target = 0.0 #niche - mainstream
+#    team = ["indie","blockbuster"] #optional?
+    def __init__(self,name, budget, decay = 0, genre = 0, scores = []):
+        self.name = name
+        self.budget = budget
+        self.decay = decay
+        self.genre = genre
+        self.scores = scores
+        self.effect = advertising_power*self.budget/comparison_budget
+        
+    def get_popularity(self, people=people_total):
+        players = 0
+        for i in people:
+            if self.name == i.now_playing:
+                players += 1
+        self.popularity = players/len(people)
+        return self.popularity
+    
+    def run_add(self, people=people_total):
+        for i in people:
+            i.influence_playing(self.game, self.effect)
+    
+    def define scores(self, scores_list)
     
     
     
