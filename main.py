@@ -14,6 +14,7 @@ import random
 n=100
 keys=["complex" , "friendly" , "meaning","polish" , "multi", "action", "difficulty", "abstract"]
 def getscore(dic1,dic2):
+            #used in influencer assignment
     sco=0
     for a in keys:
         sco+=abs(dic1[a]-dic2[a])
@@ -32,12 +33,15 @@ class Network(object):
         self.agents=[]
         self.inf=[]
         self.gf=nx.Graph()
+        #not sure if dgraph is still needed. if just doesnt work, try graph witout di
         self.ginf=nx.DiGraph()
         self.infperag=1
         self.numinf=10
         self.infdic={}
         self.infobj=[]
+        
     def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="CStyle"):
+                #generates object and the f network
         for a in range(self.size):
             self.gf.add_node(a,obj=Agent(a))
         if connectdist=="CStyle":
@@ -193,6 +197,7 @@ class Network(object):
         for a in self.agentsid:
             self.agents.append(self.getobj(a))
     def setup(self, genway="random"):
+        #sets up tastes and assigns the inf stuff
         pref={}
         for a in keys:
             pref[a]=0
@@ -262,6 +267,7 @@ class Network(object):
                         sco=s
             infdic[inf[nu]].append(a)
             self.ginf.add_edge(a,inf[nu])
+        #puts the inf stuff into a usable form
         self.infdic=infdic
         for a in self.infdic.keys():
             self.getobj(a).add_followers(self.infdic[a])        
@@ -271,8 +277,10 @@ class Network(object):
         return self.gf.nodes[personnr]["obj"]
     def draw(self):
         nx.draw(self.gf)
+    def drawi(self):
+        nx.draw(self.ginf)
     def addinf(self):
-                ####part of setp
+                ####sketch, can be erased
         #choose numinf randomagents as infs
         #loop over agents 
         # generate score for each inf according to taste similarity
