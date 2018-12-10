@@ -29,7 +29,7 @@ class Network(object):
         self.numinf=10
     def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="CStyle"):
         for a in range(self.size):
-            self.gf.add_node(a,obj="______object_____")
+            self.gf.add_node(a,obj=Person(a))
         if connectdist=="CStyle":
             for a in range(self.size):
                 #
@@ -182,7 +182,7 @@ class Network(object):
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
     def getobj(self,personnr):
-        return self.gf.nodes[personnr][obj]
+        return self.gf.nodes[personnr]["obj"]
     def draw(self):
         nx.draw(self.gf)
     def addinf(self):
@@ -204,9 +204,9 @@ advertising_power = 0.3
 comparison_budget = 1000
 
 class Agent:      
-    def __init__(self,node_num, friend_list):
+    def __init__(self,node_num):
         self.node_num = node_num
-        self.friends = friend_list
+        self.friends = []
         self.knowngames = {}
         self.preferences = {}
         self.now_playing = 0
