@@ -3,69 +3,351 @@
 ###Libraries###
 import numpy as np
 import networkx as nx 
-import Tkinter as tk
+import numpy.random as rng
+import tkinter as tk
+import random
 
 
 #### CLASSES ####
 
-#written in PSEUDOCODE
-#bububububububu
-
 #### NETWORK STRUCTURE ####
 
-class Agent:
-    friends = []
-    #aiiaiaiiaiai
-    #jijijijijijij
-    #r
-    knowngames = {}
-    preferences = {}
-    #more..
-    #ababababababababbabbu
+n=100
+keys=["complex" , "friendly" , "meaning","polish" , "multi", "action", "difficulty", "abstract"]
+
+#### NETWORK STRUCTURE ####
+class Network(object):
+    def __init__(self, size=n):
+        self.size=size
+        self.mean=0
+        self.sd=0
+        self.watchers=[]
+        self.dist=0
+        self.type=0
+        self.agentsid=[]
+        self.agents=[]
+        self.inf=[]
+        self.gf=nx.Graph()
+        self.ginf=nx.DiGraph()
+        self.infperag=1
+        self.numinf=10
+        self.infdic={}
+    def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="CStyle"):
+        for a in range(self.size):
+            self.gf.add_node(a,obj=Agent(a))
+        if connectdist=="CStyle":
+            for a in range(self.size):
+                #
+                
+                #self.gf.add_node(a,obj=______object_____)
+                
+                #
+                tar=["r"]
+                friends=[]
+                for b in list(self.gf[a]):
+                    friends.append(b)
+                    for c in list(self.gf[b]):
+                        tar.append(c)
+                    
+                
+                if frienddist=="uni":
+                    #numf=rng.uniform()
+                    #numf=numf*meanfriends//1+5
+                    numf=10
+                    #numf=15-len(friends)
+                    #if numf <0:
+                     #   numf=1
+                    numf=int(numf)
+                if connectdist=="CStyle":
+                    for aa in range(numf):
+                        nex=rng.choice(tar)
+                        if nex=="r" or int(nex) in friends+["r",a]:
+                            while nex in friends+["r",a] or int(nex) in friends+["r",a]:
+                                nex=int(rng.choice(range(self.size)))
+                        nex=int(nex)
+                        self.gf.add_edge(a,int(nex))
+                        tar=tar+list(self.gf[nex])
+                        friends.append(nex)
+                if len(self.gf[a])<5:
+                    print(a)
+                    print(friends)
+                    print(self.gf[a])
+                    print(" \n")
+        if connectdist=="randomunif":
+            #notperfect
+            numf=10
+            connect={k:[] for k in range(self.size)}
+            li=[]
+            for a in range(self.size-1):
+                it=0
+                while len(connect[a])<numf and it<100:
+                    it+=1
+                    r=rng.choice(range(a+1,self.size))
+                    if len(connect[r])<10 or r in connect[a]:
+                        #print(a,r)
+                        li.append([int(a),int(r)])
+                        connect[a].append(r)
+                        connect[r].append(a)
+                print(a,it,len(connect[a]))
+            print(len(li))
+            for b,c in li:    
+                self.gf.add_edge(b,c)
+                #gnm_random_graph(n, m, seed=None, directed=False)
+                #connected_watts_strogatz_graph(n, k, p[, ...])
+            #if len(self.gf[a])<5:
+             #   print(a)
+              #  print(friends)
+               # print(self.gf[a])
+                #print(" \n")
+        if connectdist=="randomunif2":
+            al=[]
+            numf=10
+            for a in range(numf):
+                al=al+list(range(self.size))
+            con=[]
+            al2=al
+            rng.shuffle(al2)
+            it=0
+            while it<10000:
+                it+=1
+                if len(al2)>=1:
+                    cand=al2[:2]
+                    if cand[0]!=cand[1] and cand not in con and cand[::-1] not in con:
+                        con.append(frozenset(al2[:2]))
+                        al2=al2[2:]
+                    else:
+                        rng.shuffle(al2)
+                else:
+                    break
+            print(con,len(con),len(set(con)),it)
+            for b,c in con:    
+                self.gf.add_edge(b,c)
+        if connectdist=="prederd":
+            n=self.size
+            k=10/(n-1)
+            te=nx.gnp_random_graph(n,k)
+            print(te.edges)
+                #dic={}
+                #for a in range(self.size):
+                #    dic[a]=self.gf.nodes[a][obj]
+                #nx.set_node_attributes(te,dic,"obj")                    
+                #self.gf=te  
+            self.gf.add_edges_from(te.edges)
+        if connectdist=="watstro":
+            n=self.size
+            p=0.2
+            k=10
+            te=nx.connected_watts_strogatz_graph(n,k,p,100)
+                #dic={}
+                #for a in range(self.size):
+                #    dic[a]=self.gf.nodes[a][obj]
+                #nx.set_node_attributes(te,dic,"obj")                    
+                #self.gf=te  
+            self.gf.add_edges_from(te.edges)
+        if connectdist=="full":
+            n=self.size
+            e=[]
+            for a in range(n-1):
+                for b in range(a+1,n):
+                    e.append(set([a,b]))
+                #dic={}
+                #for a in range(self.size):
+                #    dic[a]=self.gf.nodes[a][obj]
+                #nx.set_node_attributes(te,dic,"obj")                    
+                #self.gf=te  
+            self.gf.add_edges_from(e)
+                
+                
+                #karate_club_graph()
+        if connectdist=="star":
+            n=self.size
+            e=[]
+            for a in range(n):
+                e.append([a,(n+1)%n])
+                #dic={}
+                #for a in range(self.size):
+                #    dic[a]=self.gf.nodes[a][obj]
+                #nx.set_node_attributes(te,dic,"obj")                    
+                #self.gf=te  
+            self.gf.add_edges_from(e)
+        if connectdist=="circle":
+            n=self.size
+            e=[]
+            for a in range(n):
+                e.append([a,(a+1)%n])
+                #dic={}
+                #for a in range(self.size):
+                #    dic[a]=self.gf.nodes[a][obj]
+                #nx.set_node_attributes(te,dic,"obj")                    
+                #self.gf=te  
+            self.gf.add_edges_from(e)
+                        
+                
+                #karate_club_graph()
+        self.agentsid=self.gf.nodes
+        for a in self.agentsid:
+            self.agents.append(self.getobj(a))
+    def setup(self, genway="random"):
+        pref={}
+        for a in keys:
+            pref[a]=0
+        for a in self.gf.nodes():
+            dic=pref
+            for b in keys:
+                dic[b]=rng.random()
+            self.getobj(a).define_preferences(dic):
+                
+        ninf=5
+        
+        inf=random.sample(self.gf.nodes,ninf)
+        watchers=self.agentsid
+        for a in range(self.size):
+            self.ginf.add_node(a,obj=Agent(a))
+        infdic={}
+        for a in inf:
+            infdic[inf]=[]
+        if genway="random":
+            for a in watchers:
+                b=random.choice(inf)
+                infdic[b].append(a)
+                self.ginf.add_edge(b,a)
+        if genway="stricttaste":
+            for a in watchers:
+                pref=self.getobj(a).preferences
+                sco=-100000000000
+                for b in inf:
+                    inpref=self.getobj
+        self.infic=infdic
+            
+    def friendsof(self,personnr):
+        return(list(self.gf[personnr]))
+    def getobj(self,personnr):
+        return self.gf.nodes[personnr]["obj"]
+    def draw(self):
+        nx.draw(self.gf)
+    def addinf(self):
+        #choose numinf randomagents as infs
+        #loop over agents 
+        # generate score for each inf according to taste similarity
+        # chose infperag ones according to score
+        pass
+        #probably output a dic of ags per inf, but also add inf as a trait of ag
+        
+        
+
+#### AGENTS ####
+
+people_total = [] #list of person objects
+friendship_prob = 0.3
+influencer_prob = 0.3
+advertising_power = 0.3
+comparison_budget = 1000
+likes = [singleplayer, multiplayer, casual, replayable, rpg]
+genres = [fps, puzzle, strategy, platformer, sim]
 
 
-class Person(Agent):    #check on https://www.python-course.eu/python3_inheritance.php 
-    pass                   #for inherited classes
+class Agent:      
+    def __init__(self,node_num):
+        self.node_num = node_num
+        self.friends = []
+        self.knowngames = {}
+        self.preferences = {}
+        self.now_playing = 0
+        
+    def define_friends(self, liste):
+        self.friends = liste
+        
+    def define_knowngames(self, games_dict):
+        self.knowngames = games_dict
     
+    def add_knowngames(self, game, pref=0):
+        self.knowngames[game] = pref
+    
+    def set_preferences(self,likes:list):
+        self.preferences_list=likes
+        
+    def define_preferences(self, scores = [], pref_dict ={}):
+        if pref_dict:
+            self.preferences = pref_dict
+        else:
+            if scores:
+                for i in range(len(scores)):
+                    self.preferences[self.preferences_list[i]]=scores[i]
+            for item in self.preferences_list:
+                if item not in self.preferences:
+                    self.preferences[item]= 0
+        
+    def get_friends(self):
+        return self.friends 
+    
+    def get_knowngames(self):
+        return self.knowngames
+    
+    def get_preferences(self):
+        return self.preferences
+    
+    def influence_playing(self,key,prob):
+        self.knowngames[key] += prob
+    
+    def recommend(self):
+        for i in self.friends:
+            i.influence_playing(self.now_playing,friendship_prob)
+        
+    def game_infection(self):
+        for game in sorted(self.knowngames, key=self.knowngames.get, reverse=True):
+            prob=self.knowngames[game] 
+            if random.choice([0,1],[1-prob,prob]):
+                self.now_playing = game
+                #return True
+                break
+   
     
 class Influencer(Agent):
-    followers = []
-    
-    
-#### EFFECTS ON PREFERENCE ####
-    
-class Advertisement:
-    def effectonperson():
-        pass
-    def effectoninfluencer():
-        pass
-    #more?
-    
-class Influencersinfluence:
-    def effectonfollowers():
-        pass
-    #more?
+    def __init__(self):
+        Agent.__init__()
+        self.followers = []
+        
+    def add_followers(self,person):
+        self.followers.append(person)
+        
+    def recommend(self):
+        for i in self.followers:
+            i.influence_playing(self.now_playing,influencer_prob)
+        for i in self.friends:
+            i.influence_playing(self.now_playing,friendship_prob)
 
-
-class Friendsinfluence:
-    def effectonfriends():
-        pass
-    #more?
-    
-
-#### GAME ####
     
     
 class Game:
-    decay = 0
-    popularity = 0.0
-    budget = 0.0
-    multiplayer = 0.0
-    singleplayer = 0.0
-    mainstream = 0.0
-    target = 0.0 #niche - mainstream
-    team = ["indie","blockbuster"] #optional?
-    #more?
+#    decay = 0
+#    popularity = 0.0
+#    budget = 0.0
+#    multiplayer = 0.0
+#    singleplayer = 0.0
+#    mainstream = 0.0
+#    target = 0.0 #niche - mainstream
+#    team = ["indie","blockbuster"] #optional?
+    def __init__(self,name, budget, decay = 0, genre = 0, scores = []):
+        self.name = name
+        self.budget = budget
+        self.decay = decay
+        self.genre = genre
+        self.scores = scores
+        self.effect = advertising_power*self.budget/comparison_budget
+        
+    def get_popularity(self, people=people_total):
+        players = 0
+        for i in people:
+            if self.name == i.now_playing:
+                players += 1
+        self.popularity = players/len(people)
+        return self.popularity
+    
+    def run_add(self, people=people_total):
+        for i in people:
+            i.influence_playing(self.game, self.effect)
+    
+    def define scores(self, scores_list)
     
     
     
@@ -114,13 +396,15 @@ class Simumanager:
     def loadsimu(self, timestamp, datafile):
         Simumanager.timeStamp = timestamp
         
+
     def networkinit(self):      #Setup
         pass
     def networkfillup(self):
         pass
     def influencernetworkcreation(self):
         pass
-    def setupgamesparam(self):
+
+    def setupcamesparam(self):
         pass
     def fillupknowngames(self):
         pass
