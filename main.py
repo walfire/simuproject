@@ -13,7 +13,12 @@ import random
 
 n=100
 keys=["complex" , "friendly" , "meaning","polish" , "multi", "action", "difficulty", "abstract"]
-
+def getscore(dic1,dic2):
+    sco=0
+    for a in keys:
+        sco+=abs(dic1[a]-dic2[a])
+    sco=(1-sco/len(keys))*100
+    return sco
 #### NETWORK STRUCTURE ####
 class Network(object):
     def __init__(self, size=n):
@@ -31,6 +36,7 @@ class Network(object):
         self.infperag=1
         self.numinf=10
         self.infdic={}
+        self.infobj=[]
     def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="CStyle"):
         for a in range(self.size):
             self.gf.add_node(a,obj=Agent(a))
@@ -194,30 +200,60 @@ class Network(object):
             dic=pref
             for b in keys:
                 dic[b]=rng.random()
-            self.getobj(a).define_preferences(dic):
+            self.getobj(a).define_preferences(dic)
                 
         ninf=5
         
         inf=random.sample(self.gf.nodes,ninf)
+        for a in inf:
+            self.infobj.append(self.getobj[a])
         watchers=self.agentsid
         for a in range(self.size):
-            self.ginf.add_node(a,obj=Agent(a))
+            self.ginf.add_node(a,obj=self.getobj(a))
         infdic={}
         for a in inf:
-            infdic[inf]=[]
-        if genway="random":
+            infdic[a]=[]
+        if genway=="random":
             for a in watchers:
                 b=random.choice(inf)
                 infdic[b].append(a)
                 self.ginf.add_edge(b,a)
-        if genway="stricttaste":
+        if genway=="stricttaste":
             for a in watchers:
                 pref=self.getobj(a).preferences
                 sco=-100000000000
-                for b in inf:
-                    inpref=self.getobj
-        self.infic=infdic
-            
+                nu=0
+                for b in range(ninf):
+                    be=inf[b]
+                    inpref=self.getobj(be).preferences
+                    s=getscore(pref,inpref)
+                    if sco<s:
+                        nu=b
+                        sco=s
+            infdic[inf[nu]].append(a)
+            self.ginf.add_edge(a,inf[nu])
+        if genway=="double":
+            #might not work
+            for a in watchers:
+                b=random.choice(inf)
+                infdic[b].append(a)
+                self.ginf.add_edge(b,a)
+            for a in watchers:
+                pref=self.getobj(a).preferences
+                sco=-100000000000
+                nu=0
+                for b in range(ninf):
+                    be=inf[b]
+                    inpref=self.getobj(be).preferences
+                    s=getscore(pref,inpref)
+                    if sco<s:
+                        nu=b
+                        sco=s
+            infdic[inf[nu]].append(a)
+            self.ginf.add_edge(a,inf[nu])
+        self.infdic=infdic
+        for a in self.infdic.keys:
+            self.getobj(a).add_followers(self.infdic[a])        
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
     def getobj(self,personnr):
@@ -241,8 +277,8 @@ friendship_prob = 0.3
 influencer_prob = 0.3
 advertising_power = 0.3
 comparison_budget = 1000
-likes = [singleplayer, multiplayer, casual, replayable, rpg]
-genres = [fps, puzzle, strategy, platformer, sim]
+#likes = [singleplayer, multiplayer, casual, replayable, rpg]
+#genres = [fps, puzzle, strategy, platformer, sim]
 
 
 class Agent:      
@@ -251,6 +287,7 @@ class Agent:
         self.friends = []
         self.knowngames = {}
         self.preferences = {}
+        self.preferences_list=[]
         self.now_playing = 0
         
     def define_friends(self, liste):
@@ -265,16 +302,15 @@ class Agent:
     def set_preferences(self,likes:list):
         self.preferences_list=likes
         
-    def define_preferences(self, scores = [], pref_dict ={}):
-        if pref_dict:
-            self.preferences = pref_dict
-        else:
-            if scores:
-                for i in range(len(scores)):
-                    self.preferences[self.preferences_list[i]]=scores[i]
-            for item in self.preferences_list:
-                if item not in self.preferences:
-                    self.preferences[item]= 0
+    def define_preferences(self, pref_dict ={}):
+        self.preferences = pref_dict
+        #else:
+         #   if scores:
+          #      for i in range(len(scores)):
+           #         self.preferences[self.preferences_list[i]]=scores[i]
+            #for item in self.preferences_list:
+             #   if item not in self.preferences:
+              #      self.preferences[item]= 0
         
     def get_friends(self):
         return self.friends 
@@ -346,7 +382,8 @@ class Game:
         for i in people:
             i.influence_playing(self.game, self.effect)
     
-    def define scores(self, scores_list)
+    def define_scores(self, scores_list):
+        pass
     
     
     
