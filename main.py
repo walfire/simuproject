@@ -230,7 +230,18 @@ class Network(object):
                     if sco<s:
                         nu=b
                         sco=s
-            infdic[inf[nu]].append(a)
+                infdic[inf[nu]].append(a)
+            self.ginf.add_edge(a,inf[nu])
+        if genway=="unstricttaste":
+            for a in watchers:
+                pref=self.getobj(a).preferences
+                sco=[]
+                for b in range(ninf):
+                    be=inf[b]
+                    inpref=self.getobj(be).preferences
+                    sco.append(getscore(pref,inpref))
+                nu=rng.choice(range(ninf),1,sco)
+                infdic[inf[nu]].append(a)
             self.ginf.add_edge(a,inf[nu])
         if genway=="double":
             #might not work
@@ -261,6 +272,7 @@ class Network(object):
     def draw(self):
         nx.draw(self.gf)
     def addinf(self):
+                ####part of setp
         #choose numinf randomagents as infs
         #loop over agents 
         # generate score for each inf according to taste similarity
