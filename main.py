@@ -7,6 +7,7 @@ import numpy.random as rng
 import tkinter as tk
 import random
 
+
 #### CLASSES ####
 
 #### NETWORK STRUCTURE ####
@@ -457,13 +458,36 @@ class Conversionalgo:
 
 #### SIMULATION MANAGER ####
 
+#https://www.tutorialspoint.com/python/python_classes_objects.htm
+#https://likegeeks.com/python-gui-examples-tkinter-tutorial/
+
 class Simumanager:
-    'class that manages the simulation, works with timestamps'
+    'class that manages the simulation & works with timestamps'
     timeStamp = 0   #accessable from in/outside the class
     
+    def quitsimu(self):
+        self.window.destroy()
+        
+    
+    window = tk.Tk()                    #GUI of the simumanager
+    window.title("Simulation Manager")
+    window.geometry('800x600')
+    
+    quitbutton = tk.Button(window, text="Quit", command = quitsimu())
+    quitbutton.grid(column=100, row=100)
+    
+    window.mainloop()
     
     def __init__(self):
-        pass
+        Simumanager.timeStamp = 0 #init the timestamp to 0 for a new simulation
+        
+        
+    
+
+
+    def loadsimu(self, timestamp, datafile):
+        Simumanager.timeStamp = timestamp
+        
 
     def networkinit(self):      #Setup
         pass
@@ -471,6 +495,7 @@ class Simumanager:
         pass
     def influencernetworkcreation(self):
         pass
+
     def setupcamesparam(self):
         pass
     def fillupknowngames(self):
@@ -514,3 +539,4 @@ class plotter:
     #more?
     
     
+Simumanager()
