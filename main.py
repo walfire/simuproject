@@ -13,7 +13,13 @@ import random
 
 n=100
 keys=["complex" , "friendly" , "meaning","polish" , "multi", "action", "difficulty", "abstract"]
-
+def getscore(dic1,dic2):
+            #used in influencer assignment
+    sco=0
+    for a in keys:
+        sco+=abs(dic1[a]-dic2[a])
+    sco=(1-sco/len(keys))*100
+    return sco
 #### NETWORK STRUCTURE ####
 class Network(object):
     def __init__(self, size=n):
@@ -27,11 +33,15 @@ class Network(object):
         self.agents=[]
         self.inf=[]
         self.gf=nx.Graph()
+        #not sure if dgraph is still needed. if just doesnt work, try graph witout di
         self.ginf=nx.DiGraph()
         self.infperag=1
         self.numinf=10
         self.infdic={}
+        self.infobj=[]
+        
     def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="CStyle"):
+                #generates object and the f network
         for a in range(self.size):
             self.gf.add_node(a,obj=Agent(a))
         if connectdist=="CStyle":
@@ -52,7 +62,7 @@ class Network(object):
                 if frienddist=="uni":
                     #numf=rng.uniform()
                     #numf=numf*meanfriends//1+5
-                    numf=10
+                    numf=5
                     #numf=15-len(friends)
                     #if numf <0:
                      #   numf=1
@@ -187,6 +197,7 @@ class Network(object):
         for a in self.agentsid:
             self.agents.append(self.getobj(a))
     def setup(self, genway="random"):
+        #sets up tastes and assigns the inf stuff
         pref={}
         for a in keys:
             pref[a]=0
@@ -194,17 +205,19 @@ class Network(object):
             dic=pref
             for b in keys:
                 dic[b]=rng.random()
-            self.getobj(a).define_preferences(dic):
+            self.getobj(a).define_preferences(dic)
                 
         ninf=5
         
         inf=random.sample(self.gf.nodes,ninf)
+        for a in inf:
+            self.infobj.append(self.getobj(a))
         watchers=self.agentsid
         for a in range(self.size):
-            self.ginf.add_node(a,obj=Agent(a))
+            self.ginf.add_node(a,obj=self.getobj(a))
         infdic={}
         for a in inf:
-            infdic[inf]=[]
+            infdic[a]=[]
         if genway=="random":
             for a in watchers:
                 b=random.choice(inf)
@@ -214,17 +227,62 @@ class Network(object):
             for a in watchers:
                 pref=self.getobj(a).preferences
                 sco=-100000000000
-                for b in inf:
-                    inpref=self.getobj
+
+                nu=0
+                for b in range(ninf):
+                    be=inf[b]
+                    inpref=self.getobj(be).preferences
+                    s=getscore(pref,inpref)
+                    if sco<s:
+                        nu=b
+                        sco=s
+                infdic[inf[nu]].append(a)
+            self.ginf.add_edge(a,inf[nu])
+        if genway=="unstricttaste":
+            for a in watchers:
+                pref=self.getobj(a).preferences
+                sco=[]
+                for b in range(ninf):
+                    be=inf[b]
+                    inpref=self.getobj(be).preferences
+                    sco.append(getscore(pref,inpref))
+                nu=rng.choice(range(ninf),1,sco)
+                infdic[inf[nu]].append(a)
+            self.ginf.add_edge(a,inf[nu])
+        if genway=="double":
+            #might not work
+            for a in watchers:
+                b=random.choice(inf)
+                infdic[b].append(a)
+                self.ginf.add_edge(b,a)
+            for a in watchers:
+                pref=self.getobj(a).preferences
+                sco=-100000000000
+                nu=0
+                for b in range(ninf):
+                    be=inf[b]
+                    inpref=self.getobj(be).preferences
+                    s=getscore(pref,inpref)
+                    if sco<s:
+                        nu=b
+                        sco=s
+            infdic[inf[nu]].append(a)
+            self.ginf.add_edge(a,inf[nu])
+        #puts the inf stuff into a usable form
         self.infdic=infdic
-            
+        for a in self.infdic.keys():
+            self.getobj(a).add_followers(self.infdic[a])        
+
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
     def getobj(self,personnr):
         return self.gf.nodes[personnr]["obj"]
     def draw(self):
         nx.draw(self.gf)
+    def drawi(self):
+        nx.draw(self.ginf)
     def addinf(self):
+                ####sketch, can be erased
         #choose numinf randomagents as infs
         #loop over agents 
         # generate score for each inf according to taste similarity
@@ -256,6 +314,7 @@ class Agent:
         self.followers = []
         self.knowngames = {}
         self.preferences = {}
+        self.preferences_list=[]
         self.now_playing = 0
         self.time_playing = 0
         self.influencer_status = False
@@ -273,16 +332,16 @@ class Agent:
 #    def set_preferences(self,likes:list):
 #        self.preferences_list=likes
         
-    def define_preferences(self, scores = [], pref_dict ={}):
-        if pref_dict:
-            self.preferences = pref_dict
-#        else:
-#            if scores:
-#                for i in range(len(scores)):
-#                    self.preferences[self.preferences_list[i]]=scores[i]
-#            for item in self.preferences_list:
-#                if item not in self.preferences:
-#                    self.preferences[item]= 0
+
+    def define_preferences(self, pref_dict ={}):
+        self.preferences = pref_dict
+        #else:
+         #   if scores:
+          #      for i in range(len(scores)):
+           #         self.preferences[self.preferences_list[i]]=scores[i]
+            #for item in self.preferences_list:
+             #   if item not in self.preferences:
+              #      self.preferences[item]= 0
         
     def get_friends(self):
         return self.friends
@@ -357,6 +416,7 @@ class Game:
         for i in people:
             i.influence_playing(self.game, self.effect)
     
+
     def define_scores(self, keys=likes, scores_list=[], scores_dic={}):
         if scores_dic:
             self.scores = scores_dic
@@ -369,8 +429,7 @@ class Game:
     
     def set_decay(self, value=standard_decay):
         self.decay = value
-    
-    
+
     
     
 #### CONVERSION ALGORITHM ####
