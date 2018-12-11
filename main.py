@@ -4,7 +4,7 @@
 import numpy as np
 import networkx as nx 
 import numpy.random as rng
-import tkinter as tk
+
 import random
 
 
@@ -272,7 +272,7 @@ class Network(object):
         #puts the inf stuff into a usable form
         self.infdic=infdic
         for a in self.infdic.keys():
-            self.getobj(a).add_followers(self.infdic[a])        
+            self.getobj(a).define_followers(self.infdic[a])
 
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
@@ -285,7 +285,6 @@ class Network(object):
     def addinf(self):
                 ####sketch, can be erased
         #choose numinf randomagents as infs
-        #loop over agents 
         # generate score for each inf according to taste similarity
         # chose infperag ones according to score
         pass
@@ -319,12 +318,14 @@ class Agent:
         self.now_playing = 0
         self.time_playing = 0
         self.influencer_status = False
-        
+
+
+
     def define_friends(self, friends_list):
         self.friends = friends_list
         
     def define_followers(self, followers_list):
-        self.followers = followers_list
+        self.followers.extend(followers_list)
         self.influencer_status = True
         
     def define_knowngames(self, games_dict):
@@ -464,30 +465,14 @@ class Conversionalgo:
 class Simumanager:
     'class that manages the simulation & works with timestamps'
     timeStamp = 0   #accessable from in/outside the class
-    
-    def quitsimu(self):
-        self.window.destroy()
         
-    
-    window = tk.Tk()                    #GUI of the simumanager
-    window.title("Simulation Manager")
-    window.geometry('800x600')
-    
-    quitbutton = tk.Button(window, text="Quit", command = quitsimu())
-    quitbutton.grid(column=100, row=100)
-    
-    window.mainloop()
-    
     def __init__(self):
         Simumanager.timeStamp = 0 #init the timestamp to 0 for a new simulation
-        
-        
-    
+
 
 
     def loadsimu(self, timestamp, datafile):
         Simumanager.timeStamp = timestamp
-        
 
     def networkinit(self):      #Setup
         pass
@@ -517,26 +502,22 @@ class Simumanager:
 #### DATA MANAGER ####
 
 class Datamanager:
-    def savenetwork():
+    def savenetwork(self):
         pass
-    def savecurrenttimestamp():
+    def savecurrenttimestamp(self):
         pass
     
     
 #### PLOTTER ####
         
 class plotter:
-    def setupplot():
+    def setupplot(self):
         pass
-    def drawnodes():
+    def drawnodes(self):
         pass
     def drawedges(node, depth):     #node: person & influencer, depth: how many levels of friends of friends of frieds i.e.
         pass
-    def update():
+    def update(self):
         pass
-    def exportplot():
+    def exportplot(self):
         pass
-    #more?
-    
-    
-Simumanager()
