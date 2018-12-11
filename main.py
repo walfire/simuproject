@@ -304,8 +304,8 @@ standard_decay = -0.3
 decay_multiplier =0.2
 comparison_budget = 1000
 
-#likes = [singleplayer, multiplayer, casual, replayable, rpg]
-#genres = [fps, puzzle, strategy, platformer, sim]
+likes = ['singleplayer', 'multiplayer', 'casual', 'replayable', 'rpg']
+genres = ['fps', 'puzzle', 'strategy', 'platformer', 'sim']
 
 
 class Agent:      
