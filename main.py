@@ -536,7 +536,3 @@ class plotter:
         pass
     def exportplot():
         pass
-    #more?
-    
-    
-Simumanager()
