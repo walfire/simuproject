@@ -356,6 +356,7 @@ def getcol(a):
 
 people_total = [] #list of person objects
 games_total = [] #list of game objects
+games_dict = {0:0} #dictionary of str(game objects)
 friendship_prob = 0.3
 influencer_prob = 0.3
 advertising_power = 0.3
@@ -378,6 +379,10 @@ class Agent:
         self.now_playing = 0
         self.time_playing = 0
         self.influencer_status = False
+        people_total.append(self)
+        
+    def __str__(self):
+        return self.node_num
         
     def define_friends(self, friends_list):
         self.friends = friends_list
@@ -387,7 +392,7 @@ class Agent:
         self.influencer_status = True
         
     def define_knowngames(self, games_dict):
-        self.knowngames = games_dict
+        self.knowngames = games_dict.copy()
     
 #    def set_preferences(self,likes:list):
 #        self.preferences_list=likes
@@ -418,6 +423,10 @@ class Agent:
     def influence_playing(self,key,prob):
         self.knowngames[key] += prob
     
+    def decay_playing(self):
+        #if statt {0:0}
+        self.knowngames[str(self.now_playing)] += standard_decay
+    
     def recommend(self):
         for i in self.friends:
             i.influence_playing(self.now_playing,friendship_prob)
@@ -439,7 +448,8 @@ class Agent:
 #            disinterest =self.time_playing*self.now_playing
 #            self.influence_playing(self.now_playing, disinterest)
    
-    
+game_num = 0
+   
 class Game:
 #    decay = 0
 #    popularity = 0.0
@@ -449,13 +459,20 @@ class Game:
 #    mainstream = 0.0
 #    target = 0.0 #niche - mainstream
 #    team = ["indie","blockbuster"] #optional?
-    def __init__(self,name, budget, decay = 0, genre = 0, scores = []):
+    def __init__(name = game_num, game_id= game_num, budget, decay = 0, genre = 0, scores = []):
         self.name = name
         self.budget = budget
         self.decay = decay
         self.genre = genre
         self.scores = scores
         self.effect = advertising_power*self.budget/comparison_budget
+        self.game_id = game_id
+        games_total.append(self)
+        games_dict[str(self)]=0
+        game_num += 1
+        
+    def __str__(self):
+        return self.name
         
     def get_popularity(self, people=people_total):
         players = 0
