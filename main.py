@@ -525,6 +525,3 @@ class plotter:
     def exportplot(self):
         pass
 
-sim = Simumanager()
-sim.networkinit()
-sim.networkfillup()
