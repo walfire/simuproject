@@ -221,6 +221,7 @@ class Network(object):
         self.agentsid=self.gf.nodes
         for a in self.agentsid:
             self.agents.append(self.getobj(a))
+            people_total.append(self.getobj(a))
     def setup(self, genway="random"):
         #sets up tastes and assigns the inf stuff
         pref={}
@@ -328,7 +329,7 @@ class Network(object):
             else:
                 eee="d"
                 aaa=30+5*a.time_playing
-            toplot.add_node(a.node_num,col=a.now_playing,size=1,shape=eee)
+            toplot.add_node(a.node_num,col=a.now_playing,size=aaa,shape=eee)
         toplot.add_edges_from(self.gf.edges,col="k",wei=2)
         #for aa in range(len(self.inf)):
          #   a=self.inf[aa]
