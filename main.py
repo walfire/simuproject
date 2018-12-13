@@ -221,7 +221,6 @@ class Network(object):
         self.agentsid=self.gf.nodes
         for a in self.agentsid:
             self.agents.append(self.getobj(a))
-            people_total.append(self.getobj(a))
     def setup(self, genway="random"):
         #sets up tastes and assigns the inf stuff
         pref={}
@@ -329,7 +328,7 @@ class Network(object):
             else:
                 eee="d"
                 aaa=30+5*a.time_playing
-            toplot.add_node(a.node_num,col=a.now_playing,size=aaa,shape=eee)
+            toplot.add_node(a.node_num,col=a.now_playing,size=1,shape=eee)
         toplot.add_edges_from(self.gf.edges,col="k",wei=2)
         #for aa in range(len(self.inf)):
          #   a=self.inf[aa]
@@ -448,9 +447,8 @@ class Agent:
 #        if self.now_playing:
 #            disinterest =self.time_playing*self.now_playing
 #            self.influence_playing(self.now_playing, disinterest)
-   
-game_num = 0
-   
+
+  
 class Game:
 #    decay = 0
 #    popularity = 0.0
@@ -460,7 +458,8 @@ class Game:
 #    mainstream = 0.0
 #    target = 0.0 #niche - mainstream
 #    team = ["indie","blockbuster"] #optional?
-    def __init__(name = game_num, game_id= game_num, budget, decay = 0, genre = 0, scores = []):
+    game_num = 0
+    def __init__(self, budget, name = game_num, game_id= game_num, decay = 0, genre = 0, scores = []):
         self.name = name
         self.budget = budget
         self.decay = decay
@@ -470,7 +469,7 @@ class Game:
         self.game_id = game_id
         games_total.append(self)
         games_dict[str(self)]=0
-        game_num += 1
+        Game.game_num += 1
         
     def __str__(self):
         return self.name
