@@ -13,7 +13,7 @@ import random
 #### NETWORK STRUCTURE ####
 
 n=100
-keys=["complex" , "friendly" , "meaning","polish" , "multi", "action", "difficulty", "abstract"]
+keys=["complex" , "friendly" , "meaning", "polish" , "multi", "action", "difficulty", "abstract"]
 def getscore(dic1,dic2):
             #used in influencer assignment
     sco=0
@@ -475,9 +475,12 @@ class Simumanager:
         Simumanager.timeStamp = timestamp
 
     def networkinit(self):      #Setup
-        pass
+        net = Network()
+        net.generate()
+
     def networkfillup(self):
-        pass
+        self.net.setup()
+        self.net.draw()
     def influencernetworkcreation(self):
         pass
 
@@ -521,3 +524,7 @@ class plotter:
         pass
     def exportplot(self):
         pass
+
+sim = Simumanager()
+sim.networkinit()
+sim.networkfillup()
