@@ -220,6 +220,7 @@ class Network(object):
         self.agentsid=self.gf.nodes
         for a in self.agentsid:
             self.agents.append(self.getobj(a))
+            people_total.append(self.getobj(a))
     def setup(self, genway="random"):
         #sets up tastes and assigns the inf stuff
         pref={}
