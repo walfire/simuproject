@@ -1,6 +1,7 @@
 #### SIMU PROJECT ####
 
 ###Libraries###
+import matplotlib.pyplot as plt
 import numpy as np
 import networkx as nx 
 import numpy.random as rng
@@ -12,7 +13,7 @@ import random
 
 #### NETWORK STRUCTURE ####
 
-n=100
+n=500
 keys=["complex" , "friendly" , "meaning","polish" , "multi", "action", "difficulty", "abstract"]
 def getscore(dic1,dic2):
             #used in influencer assignment
@@ -41,7 +42,7 @@ class Network(object):
         self.infdic={}
         self.infobj=[]
         
-    def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="CStyle"):
+    def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="bara"):
                 #generates object and the f network
         for a in range(self.size):
             self.gf.add_node(a,obj=Agent(a))
@@ -302,7 +303,12 @@ class Network(object):
     def getobj(self,personnr):
         return self.gf.nodes[personnr]["obj"]
     def draw(self):
-        nx.draw(self.gf)
+        ax=plt.gca()
+        ax.clear()
+        fig = plt.gcf()
+        #fig.set_size_inches(13,20)#    set dimension of window
+        nx.draw(self.gf,node_size=100,node_color="red")
+        
     def drawi(self):
         nx.draw(self.ginf)
     def addinf(self):
@@ -322,7 +328,7 @@ class Network(object):
             else:
                 eee="d"
                 aaa=30+5*a.time_playing
-            toplot.add_node(a.node_num,col=a.now_playing,size=aaa,shape=eee)
+            toplot.add_node(a.node_num,col=a.now_playing,size=1,shape=eee)
         toplot.add_edges_from(self.gf.edges,col="k",wei=2)
         #for aa in range(len(self.inf)):
          #   a=self.inf[aa]
@@ -338,7 +344,7 @@ class Network(object):
         size=[toplot.nodes[u]["size"] for u in nodes]
         shape=[toplot.nodes[u]["shape"] for u in nodes]
         print(colors)
-        nx.draw(toplot, nodes=nodes, node_color= coln, node_size=size, 
+        nx.draw_networkx(toplot, nodes=nodes, node_color= coln, node_size=size, 
                 #node_shape=shape, 
                 edges=edges, edge_color=colors, 
                 width=wei
@@ -518,19 +524,19 @@ class Simumanager:
     'class that manages the simulation & works with timestamps'
     timeStamp = 0   #accessable from in/outside the class
     
-    def quitsimu(self):
-        self.window.destroy()
-        
-    
-    window = tk.Tk()                    #GUI of the simumanager
-    window.title("Simulation Manager")
-    window.geometry('800x600')
-    
-    quitbutton = tk.Button(window, text="Quit", command = quitsimu())
-    quitbutton.grid(column=100, row=100)
-    
-    window.mainloop()
-    
+#    def quitsimu(self):
+#        self.window.destroy()
+#        
+#    
+#    window = tk.Tk()                    #GUI of the simumanager
+#    window.title("Simulation Manager")
+#    window.geometry('800x600')
+#    
+#    quitbutton = tk.Button(window, text="Quit", command = quitsimu())
+#    quitbutton.grid(column=100, row=100)
+#    
+#    window.mainloop()
+#    
     def __init__(self):
         Simumanager.timeStamp = 0 #init the timestamp to 0 for a new simulation
         
@@ -567,25 +573,27 @@ class Simumanager:
     def convalgo(self):
         pass
     
-#### DATA MANAGER ####
+##### DATA MANAGER ####
+#
+#class Datamanager:
+#    def savenetwork():
+#        pass
+#    def savecurrenttimestamp():
+#        pass
+#    
+#    
+##### PLOTTER ####
+#        
+#class plotter:
+#    def setupplot():
+#        pass
+#    def drawnodes():
+#        pass
+#    def drawedges(node, depth):     #node: person & influencer, depth: how many levels of friends of friends of frieds i.e.
+#        pass
+#    def update():
+#        pass
+#    def exportplot():
+#        pass
 
-class Datamanager:
-    def savenetwork():
-        pass
-    def savecurrenttimestamp():
-        pass
-    
-    
-#### PLOTTER ####
-        
-class plotter:
-    def setupplot():
-        pass
-    def drawnodes():
-        pass
-    def drawedges(node, depth):     #node: person & influencer, depth: how many levels of friends of friends of frieds i.e.
-        pass
-    def update():
-        pass
-    def exportplot():
-        pass
+
