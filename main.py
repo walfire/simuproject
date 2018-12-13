@@ -35,7 +35,7 @@ class Network(object):
         self.inf=[]
         self.gf=nx.Graph()
         #not sure if dgraph is still needed. if just doesnt work, try graph witout di
-        self.ginf=nx.DiGraph()
+        self.ginf=nx.Graph()
         self.infperag=1
         self.numinf=10
         self.infdic={}
@@ -136,7 +136,7 @@ class Network(object):
             n=self.size
             k=10/(n-1)
             te=nx.gnp_random_graph(n,k)
-            print(te.edges)
+            #print(te.edges)
                 #dic={}
                 #for a in range(self.size):
                 #    dic[a]=self.gf.nodes[a][obj]
@@ -145,9 +145,32 @@ class Network(object):
             self.gf.add_edges_from(te.edges)
         if connectdist=="watstro":
             n=self.size
-            p=0.2
+            p=0.05
             k=10
             te=nx.connected_watts_strogatz_graph(n,k,p,100)
+                #dic={}
+                #for a in range(self.size):
+                #    dic[a]=self.gf.nodes[a][obj]
+                #nx.set_node_attributes(te,dic,"obj")                    
+                #self.gf=te  
+            self.gf.add_edges_from(te.edges)
+        if connectdist=="bara":
+            n=self.size
+            p=0.05
+            k=5
+            te=nx.barabasi_albert_graph(n,k)
+                #dic={}
+                #for a in range(self.size):
+                #    dic[a]=self.gf.nodes[a][obj]
+                #nx.set_node_attributes(te,dic,"obj")                    
+                #self.gf=te  
+            self.gf.add_edges_from(te.edges)
+        if connectdist=="pow":
+            n=self.size
+            #k=min(n/10,5)
+            k=4
+            p=0.05
+            te=nx.powerlaw_cluster_graph(n,k,p)
                 #dic={}
                 #for a in range(self.size):
                 #    dic[a]=self.gf.nodes[a][obj]
@@ -289,9 +312,39 @@ class Network(object):
         # chose infperag ones according to score
         pass
         #probably output a dic of ags per inf, but also add inf as a trait of ag
+    def niceplot(self):
+        toplot=nx.Graph()
+        for a in self.agents:
+            if a.node_num in self.inf:
+                eee="d"
+                aaa=100+10*a.time_playing
+            else:
+                eee="d"
+                aaa=30+5*a.time_playing
+            toplot.add_node(a.node_num,col=a.now_playing,size=aaa,shape=eee)
+        toplot.add_edges_from(self.gf.edges,col="k",wei=2)
+        #for aa in range(len(self.inf)):
+         #   a=self.inf[aa]
+          #  for b in list(self.ginf[a]):
+           #     toplot.add_edge(a,b,col=getcol(aa),wei=5)
+        toplot.add_edges_from(self.ginf.edges,col="r",wei=1)
         
-        
-
+        edges=toplot.edges
+        nodes=toplot.nodes
+        colors = [toplot[u][v]['col'] for u,v in edges]
+        wei = [toplot[u][v]['wei'] for u,v in edges]
+        coln=[toplot.nodes[u]["col"] for u in nodes]
+        size=[toplot.nodes[u]["size"] for u in nodes]
+        shape=[toplot.nodes[u]["shape"] for u in nodes]
+        print(colors)
+        nx.draw(toplot, nodes=nodes, node_color= coln, node_size=size, 
+                #node_shape=shape, 
+                edges=edges, edge_color=colors, 
+                width=wei
+                )
+def getcol(a):
+    col=["g","b","y","m","r"]
+    return col[a]
 #### AGENTS ####
 
 people_total = [] #list of person objects
