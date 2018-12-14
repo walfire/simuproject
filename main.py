@@ -42,7 +42,7 @@ class Network(object):
         self.infdic={}
         self.infobj=[]
         
-    def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="bara"):
+    def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="watstro"):
                 #generates object and the f network
         for a in range(self.size):
             self.gf.add_node(a,obj=Agent(a))
@@ -84,7 +84,7 @@ class Network(object):
                     print(friends)
                     print(self.gf[a])
                     print(" \n")
-        if connectdist=="randomunif":
+        elif connectdist=="randomunif":
             #notperfect
             numf=10
             connect={k:[] for k in range(self.size)}
@@ -110,7 +110,7 @@ class Network(object):
               #  print(friends)
                # print(self.gf[a])
                 #print(" \n")
-        if connectdist=="randomunif2":
+        elif connectdist=="randomunif2":
             al=[]
             numf=10
             for a in range(numf):
@@ -133,94 +133,62 @@ class Network(object):
             print(con,len(con),len(set(con)),it)
             for b,c in con:    
                 self.gf.add_edge(b,c)
-        if connectdist=="prederd":
+        elif connectdist=="prederd":
             n=self.size
             k=10/(n-1)
             te=nx.gnp_random_graph(n,k)
-            #print(te.edges)
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
             self.gf.add_edges_from(te.edges)
-        if connectdist=="watstro":
+        elif connectdist=="watstro":
             n=self.size
             p=0.05
             k=10
-            te=nx.connected_watts_strogatz_graph(n,k,p,100)
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
+            te=nx.connected_watts_strogatz_graph(n,k,p,100) 
             self.gf.add_edges_from(te.edges)
-        if connectdist=="bara":
+        elif connectdist=="bara":
             n=self.size
             p=0.05
             k=5
             te=nx.barabasi_albert_graph(n,k)
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
             self.gf.add_edges_from(te.edges)
-        if connectdist=="pow":
+        elif connectdist=="pow":
             n=self.size
             #k=min(n/10,5)
             k=4
             p=0.05
-            te=nx.powerlaw_cluster_graph(n,k,p)
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
+            te=nx.powerlaw_cluster_graph(n,k,p) 
             self.gf.add_edges_from(te.edges)
-        if connectdist=="full":
+        elif connectdist=="full":
             n=self.size
             e=[]
             for a in range(n-1):
                 for b in range(a+1,n):
                     e.append(set([a,b]))
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
             self.gf.add_edges_from(e)
                 
                 
                 #karate_club_graph()
-        if connectdist=="star":
+        elif connectdist=="star":
             n=self.size
             e=[]
             for a in range(n):
                 e.append([a,(n+1)%n])
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
             self.gf.add_edges_from(e)
-        if connectdist=="circle":
+        elif connectdist=="circle":
             n=self.size
             e=[]
             for a in range(n):
-                e.append([a,(a+1)%n])
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
+                e.append([a,(a+1)%n]) 
             self.gf.add_edges_from(e)
-                        
-                
                 #karate_club_graph()
+                
+        else:
+            raise("ERROR: UNVALID GENERATE KEY")
+            
         self.agentsid=self.gf.nodes
         for a in self.agentsid:
             self.agents.append(self.getobj(a))
+            
+            
     def setup(self, genway="random"):
         #sets up tastes and assigns the inf stuff
         pref={}
@@ -261,7 +229,7 @@ class Network(object):
                     if sco<s:
                         nu=b
                         sco=s
-                infdic[inf[nu]].append(a)
+                infdic[inf[nu]].append(self.getobj(a)) #attention check
             self.ginf.add_edge(a,inf[nu])
         if genway=="unstricttaste":
             for a in watchers:
@@ -520,7 +488,7 @@ class Conversionalgo:
         for item in games_total:
             item.run_add()
         for person in people_total:
-            person.recommend()
+            person.recommend()              #ev in game class
         for person in people_total:
             person.game_infection()
     
@@ -564,11 +532,19 @@ class Simumanager:
     def loadsimu(self, timestamp, datafile):
         Simumanager.timeStamp = timestamp
         
+    def addgames(self,gamesnumber=5, budget="random"):  #create n instances of games, which automatically get added in games_total list
+        if budget == "random":
+            budgetamount = random
+            for i in range(0,gamesnumber):
+                Game(random)
+        else:                                           #open for extension for non random assignment of budget
+            raise ("ERROR: INVALID BUDGET PARAMETER INPUT")
 
     def networkinit(self):      #Setup
         pass
+
     def networkfillup(self):
-        pass
+        pass    
     def influencernetworkcreation(self):
         pass
 
