@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import networkx as nx 
 import numpy.random as rng
+import pandas as pd
 
 import random
 
@@ -338,7 +339,7 @@ genres = ['fps', 'puzzle', 'strategy', 'platformer', 'sim']
 
 class Agent:      
     def __init__(self,node_num):
-        self.node_num = node_num
+        self.node_num = node_num          #ID of agent
         self.friends = []
         self.followers = []
         self.knowngames = {}
@@ -530,9 +531,9 @@ class Simumanager:
 
     def addgames(self,gamesnumber=5, budget="random"):  #create n instances of games, which automatically get added in games_total list
         if budget == "random":
-            budgetamount = random
+            budgetamount = random()
             for i in range(0,gamesnumber):
-                Game(random)
+                Game(budgetamount)
         else:                                           #open for extension for non random assignment of budget
             raise Exception("ERROR: INVALID BUDGET PARAMETER INPUT")
 
@@ -565,27 +566,57 @@ class Simumanager:
     def conversion(self):               #decides which game gets played
         for person in people_total:
             person.game_infection()
-            
+
     def exporttimestamp(self):
         pass
+
     def get_agents(self):
         pass
+
     def get_games(self):
         pass
+
     def decay(self):
         pass
+
     def nextstep(self):             #increases timestamp of simulation by 1
         self.timestamp +=1
 
 ##### DATA MANAGER ####
-#
-#class Datamanager:
-#    def savenetwork():
-#        pass
-#    def savecurrenttimestamp():
-#        pass
-#    
-#    
+
+class Datamanager:          #call it after the network creation, to instantiate a pandas matrix that has the information
+                            #about all the agents at timestamp = 0
+    def __init__(self, node_num):
+        self.columns = ["timestamp", "agent ID", "isinfluencer", "current played game", "how long been playing current game", "friends playing the same", "does influencer play the same" ]
+        
+        if games_total:                 #appends to the index list the names of the played games list
+            for game in games_total:
+                if game.name != "Null_Game":
+                    self.columns.append("game " + str(game.name) + " preference %")
+        
+        self.listofagents = []
+        for person in people_total:
+            agent = []
+            agent.append(self.timestamp)
+            agent.append(person.node_num)
+            agent.append(person.influencer_status)
+            agent.append(person.now_playing)
+            agent.append(person.time_playing)       # check on this
+        
+        self.rows = {}
+        
+        
+        self.table = pd.DataFrames(column = self.columns)
+
+    def createtable(self):
+        pass
+    def savecurrenttimestamp(self):
+        pass
+
+
+
+
+
 ##### PLOTTER ####
 #        
 #class plotter:
