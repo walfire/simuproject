@@ -6,7 +6,6 @@ import numpy as np
 import networkx as nx 
 import numpy.random as rng
 import pandas as pd
-
 import random
 
 
@@ -621,23 +620,29 @@ class Datamanager:          #call it after the network creation, to instantiate 
         self.table.to_excel(writer, sheet_name='Sheet1')
         writer.save()
         
-        
     def createtable(self):
         pass
     def savecurrenttimestamp(self):
         pass
 
 
+#sim = Simumanager()
+#sim.addgames()
+#sim.networkinit()
+#sim.drawnetwork()
+#data = Datamanager()
+#data.get_table()
+#data.export_table()
+        
 sim = Simumanager()
 sim.addgames()
-sim.networkinit()
-#sim.drawnetwork()
+net = Network()
+net.generate()
+net.setup()
+net.draw()
 data = Datamanager()
 data.get_table()
 data.export_table()
-
-
-
 
 ##### PLOTTER ####
 #        
