@@ -484,13 +484,13 @@ class Conversionalgo:
         self.counter = step_num
         self.currentstatus = {}
         
-    def implement_influence(self):
-        for item in games_total:
-            item.run_add()
-        for person in people_total:
-            person.recommend()              #ev in game class
-        for person in people_total:
-            person.game_infection()
+    # def implement_influence(self):        #commented out because now in simumanager
+    #     for item in games_total:
+    #         item.run_add()
+    #     for person in people_total:
+    #         person.recommend()              #ev in game class
+    #     for person in people_total:
+    #         person.game_infection()
     
     def get_currentstatus(self):
         for item in games_total:
@@ -558,24 +558,25 @@ class Simumanager:
             if item is not "Null_Game":         #there wont be an AD for a Non Game
                 item.run_add
 
-    #
-    # def influfriendround(self):
-    #     for person in people_total:
-    #         for friend in person.friends:
-    #             friend
+    def influfriendround(self):
+        for person in people_total:
+            person.recommend()          #includes friend influence over other friends, and influencers influence
 
-
+    def conversion(self):               #decides which game gets played
+        for person in people_total:
+            person.game_infection()
+            
+    def exporttimestamp(self):
+        pass
+    def get_agents(self):
+        pass
+    def get_games(self):
+        pass
     def decay(self):
         pass
-    def ad(self):
-        pass
-    def influ(self):
-        pass
-    def friend(self):
-        pass
-    def convalgo(self):
-        pass
-    
+    def nextstep(self):             #increases timestamp of simulation by 1
+        self.timestamp +=1
+
 ##### DATA MANAGER ####
 #
 #class Datamanager:
