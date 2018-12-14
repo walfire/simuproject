@@ -182,7 +182,7 @@ class Network(object):
                 #karate_club_graph()
                 
         else:
-            raise("ERROR: UNVALID GENERATE KEY")
+            raise Exception("ERROR: UNVALID GENERATE KEY")
             
         self.agentsid=self.gf.nodes
         for a in self.agentsid:
@@ -319,6 +319,7 @@ class Network(object):
 def getcol(a):
     col=["g","b","y","m","r"]
     return col[a]
+
 #### AGENTS ####
 
 people_total = [] #list of person objects
@@ -506,7 +507,7 @@ class Conversionalgo:
 
 class Simumanager:
     'class that manages the simulation & works with timestamps'
-    timeStamp = 0   #accessable from in/outside the class
+    timestamp = 0   #accessable from in/outside the class
 
 #    def quitsimu(self):
 #        self.window.destroy()
@@ -522,10 +523,10 @@ class Simumanager:
 #    window.mainloop()
 #
     def __init__(self):
-        Simumanager.timeStamp = 0 #init the timestamp to 0 for a new simulation
+        Simumanager.timestamp = 0 #init the timestamp to 0 for a new simulation
 
     def loadsimu(self, timestamp, datafile):
-        Simumanager.timeStamp = timestamp
+        Simumanager.timestamp = timestamp
 
     def addgames(self,gamesnumber=5, budget="random"):  #create n instances of games, which automatically get added in games_total list
         if budget == "random":
@@ -533,25 +534,23 @@ class Simumanager:
             for i in range(0,gamesnumber):
                 Game(random)
         else:                                           #open for extension for non random assignment of budget
-            raise ("ERROR: INVALID BUDGET PARAMETER INPUT")
+            raise Exception("ERROR: INVALID BUDGET PARAMETER INPUT")
 
     def networkinit(self,agentsnumber=500,influassignment="random"):      #creates n agents (500 as preset), assigns preferences,
         Network(agentsnumber)
         Network.generate()   # using watstro simulation as preset
         Network.setup(influassignment)  #random, stricttaste, unstricttaste, double keys for influencer init and assignment
 
+    def drawnetwork(self,timestamp,type="agents"):
+        if type == "agents":
+            Network.draw()
+        if type == "influencers":
+            Network.drawi()
+        if type == "agents_influencers":
+            Network.niceplot()
+        else:
+            raise Exception("Error: INVALID TYPE PARAMETER INPUT")
 
-    def networkfillup(self):
-        pass    
-
-    def influencernetworkcreation(self):
-        pass
-
-    def setupcamesparam(self):
-        pass
-    def fillupknowngames(self):
-        pass
-    
     def stateofknowngame(self):     #1 Timestamp
         pass
     def decay(self):
