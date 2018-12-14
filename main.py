@@ -1,6 +1,7 @@
 #### SIMU PROJECT ####
 
 ###Libraries###
+import matplotlib.pyplot as plt
 import numpy as np
 import networkx as nx 
 import numpy.random as rng
@@ -12,8 +13,9 @@ import random
 
 #### NETWORK STRUCTURE ####
 
-n=100
-keys=["complex" , "friendly" , "meaning", "polish" , "multi", "action", "difficulty", "abstract"]
+n=500
+keys=["complex" , "friendly" , "meaning","polish" , "multi", "action", "difficulty", "abstract"]
+
 def getscore(dic1,dic2):
             #used in influencer assignment
     sco=0
@@ -41,7 +43,7 @@ class Network(object):
         self.infdic={}
         self.infobj=[]
         
-    def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="CStyle"):
+    def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="watstro"):
                 #generates object and the f network
         for a in range(self.size):
             self.gf.add_node(a,obj=Agent(a))
@@ -83,7 +85,7 @@ class Network(object):
                     print(friends)
                     print(self.gf[a])
                     print(" \n")
-        if connectdist=="randomunif":
+        elif connectdist=="randomunif":
             #notperfect
             numf=10
             connect={k:[] for k in range(self.size)}
@@ -109,7 +111,7 @@ class Network(object):
               #  print(friends)
                # print(self.gf[a])
                 #print(" \n")
-        if connectdist=="randomunif2":
+        elif connectdist=="randomunif2":
             al=[]
             numf=10
             for a in range(numf):
@@ -132,94 +134,62 @@ class Network(object):
             print(con,len(con),len(set(con)),it)
             for b,c in con:    
                 self.gf.add_edge(b,c)
-        if connectdist=="prederd":
+        elif connectdist=="prederd":
             n=self.size
             k=10/(n-1)
             te=nx.gnp_random_graph(n,k)
-            #print(te.edges)
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
             self.gf.add_edges_from(te.edges)
-        if connectdist=="watstro":
+        elif connectdist=="watstro":
             n=self.size
             p=0.05
             k=10
-            te=nx.connected_watts_strogatz_graph(n,k,p,100)
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
+            te=nx.connected_watts_strogatz_graph(n,k,p,100) 
             self.gf.add_edges_from(te.edges)
-        if connectdist=="bara":
+        elif connectdist=="bara":
             n=self.size
             p=0.05
             k=5
             te=nx.barabasi_albert_graph(n,k)
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
             self.gf.add_edges_from(te.edges)
-        if connectdist=="pow":
+        elif connectdist=="pow":
             n=self.size
             #k=min(n/10,5)
             k=4
             p=0.05
-            te=nx.powerlaw_cluster_graph(n,k,p)
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
+            te=nx.powerlaw_cluster_graph(n,k,p) 
             self.gf.add_edges_from(te.edges)
-        if connectdist=="full":
+        elif connectdist=="full":
             n=self.size
             e=[]
             for a in range(n-1):
                 for b in range(a+1,n):
                     e.append(set([a,b]))
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
             self.gf.add_edges_from(e)
                 
                 
                 #karate_club_graph()
-        if connectdist=="star":
+        elif connectdist=="star":
             n=self.size
             e=[]
             for a in range(n):
                 e.append([a,(n+1)%n])
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
             self.gf.add_edges_from(e)
-        if connectdist=="circle":
+        elif connectdist=="circle":
             n=self.size
             e=[]
             for a in range(n):
-                e.append([a,(a+1)%n])
-                #dic={}
-                #for a in range(self.size):
-                #    dic[a]=self.gf.nodes[a][obj]
-                #nx.set_node_attributes(te,dic,"obj")                    
-                #self.gf=te  
+                e.append([a,(a+1)%n]) 
             self.gf.add_edges_from(e)
-                        
-                
                 #karate_club_graph()
+                
+        else:
+            raise("ERROR: UNVALID GENERATE KEY")
+            
         self.agentsid=self.gf.nodes
         for a in self.agentsid:
             self.agents.append(self.getobj(a))
+            
+            
     def setup(self, genway="random"):
         #sets up tastes and assigns the inf stuff
         pref={}
@@ -260,7 +230,7 @@ class Network(object):
                     if sco<s:
                         nu=b
                         sco=s
-                infdic[inf[nu]].append(a)
+                infdic[inf[nu]].append(self.getobj(a)) #attention check
             self.ginf.add_edge(a,inf[nu])
         if genway=="unstricttaste":
             for a in watchers:
@@ -302,7 +272,12 @@ class Network(object):
     def getobj(self,personnr):
         return self.gf.nodes[personnr]["obj"]
     def draw(self):
-        nx.draw(self.gf)
+        ax=plt.gca()
+        ax.clear()
+        fig = plt.gcf()
+        #fig.set_size_inches(13,20)#    set dimension of window
+        nx.draw(self.gf,node_size=100,node_color="red")
+        
     def drawi(self):
         nx.draw(self.ginf)
     def addinf(self):
@@ -321,7 +296,7 @@ class Network(object):
             else:
                 eee="d"
                 aaa=30+5*a.time_playing
-            toplot.add_node(a.node_num,col=a.now_playing,size=aaa,shape=eee)
+            toplot.add_node(a.node_num,col=a.now_playing,size=1,shape=eee)
         toplot.add_edges_from(self.gf.edges,col="k",wei=2)
         #for aa in range(len(self.inf)):
          #   a=self.inf[aa]
@@ -337,7 +312,7 @@ class Network(object):
         size=[toplot.nodes[u]["size"] for u in nodes]
         shape=[toplot.nodes[u]["shape"] for u in nodes]
         print(colors)
-        nx.draw(toplot, nodes=nodes, node_color= coln, node_size=size, 
+        nx.draw_networkx(toplot, nodes=nodes, node_color= coln, node_size=size, 
                 #node_shape=shape, 
                 edges=edges, edge_color=colors, 
                 width=wei
@@ -349,6 +324,7 @@ def getcol(a):
 
 people_total = [] #list of person objects
 games_total = [] #list of game objects
+games_dict = {0:0} #dictionary of str(game objects)
 friendship_prob = 0.3
 influencer_prob = 0.3
 advertising_power = 0.3
@@ -371,9 +347,11 @@ class Agent:
         self.now_playing = 0
         self.time_playing = 0
         self.influencer_status = False
-
-
-
+        people_total.append(self)
+        
+    def __str__(self):
+        return self.node_num
+        
     def define_friends(self, friends_list):
         self.friends = friends_list
         
@@ -382,7 +360,7 @@ class Agent:
         self.influencer_status = True
         
     def define_knowngames(self, games_dict):
-        self.knowngames = games_dict
+        self.knowngames = games_dict.copy()
     
 #    def set_preferences(self,likes:list):
 #        self.preferences_list=likes
@@ -413,6 +391,10 @@ class Agent:
     def influence_playing(self,key,prob):
         self.knowngames[key] += prob
     
+    def decay_playing(self):
+        #if statt {0:0}
+        self.knowngames[str(self.now_playing)] += standard_decay
+    
     def recommend(self):
         for i in self.friends:
             i.influence_playing(self.now_playing,friendship_prob)
@@ -433,8 +415,8 @@ class Agent:
 #        if self.now_playing:
 #            disinterest =self.time_playing*self.now_playing
 #            self.influence_playing(self.now_playing, disinterest)
-   
-    
+
+  
 class Game:
 #    decay = 0
 #    popularity = 0.0
@@ -444,13 +426,21 @@ class Game:
 #    mainstream = 0.0
 #    target = 0.0 #niche - mainstream
 #    team = ["indie","blockbuster"] #optional?
-    def __init__(self,name, budget, decay = 0, genre = 0, scores = []):
+    game_num = 0
+    def __init__(self, budget, name = game_num, game_id= game_num, decay = 0, genre = 0, scores = []):
         self.name = name
         self.budget = budget
         self.decay = decay
         self.genre = genre
         self.scores = scores
         self.effect = advertising_power*self.budget/comparison_budget
+        self.game_id = game_id
+        games_total.append(self)
+        games_dict[str(self)]=0
+        Game.game_num += 1
+        
+    def __str__(self):
+        return self.name
         
     def get_popularity(self, people=people_total):
         players = 0
@@ -498,7 +488,7 @@ class Conversionalgo:
         for item in games_total:
             item.run_add()
         for person in people_total:
-            person.recommend()
+            person.recommend()              #ev in game class
         for person in people_total:
             person.game_infection()
     
@@ -518,7 +508,20 @@ class Conversionalgo:
 class Simumanager:
     'class that manages the simulation & works with timestamps'
     timeStamp = 0   #accessable from in/outside the class
-        
+
+#    def quitsimu(self):
+#        self.window.destroy()
+#        
+#    
+#    window = tk.Tk()                    #GUI of the simumanager
+#    window.title("Simulation Manager")
+#    window.geometry('800x600')
+#    
+#    quitbutton = tk.Button(window, text="Quit", command = quitsimu())
+#    quitbutton.grid(column=100, row=100)
+#    
+#    window.mainloop()
+#
     def __init__(self):
         Simumanager.timeStamp = 0 #init the timestamp to 0 for a new simulation
 
@@ -527,13 +530,20 @@ class Simumanager:
     def loadsimu(self, timestamp, datafile):
         Simumanager.timeStamp = timestamp
 
+    def addgames(self,gamesnumber=5, budget="random"):  #create n instances of games, which automatically get added in games_total list
+        if budget == "random":
+            budgetamount = random
+            for i in range(0,gamesnumber):
+                Game(random)
+        else:                                           #open for extension for non random assignment of budget
+            raise ("ERROR: INVALID BUDGET PARAMETER INPUT")
+
     def networkinit(self):      #Setup
-        net = Network()
-        net.generate()
+        pass
 
     def networkfillup(self):
-        self.net.setup()
-        self.net.draw()
+        pass    
+
     def influencernetworkcreation(self):
         pass
 
@@ -555,26 +565,25 @@ class Simumanager:
     def convalgo(self):
         pass
     
-#### DATA MANAGER ####
-
-class Datamanager:
-    def savenetwork(self):
-        pass
-    def savecurrenttimestamp(self):
-        pass
-    
-    
-#### PLOTTER ####
-        
-class plotter:
-    def setupplot(self):
-        pass
-    def drawnodes(self):
-        pass
-    def drawedges(node, depth):     #node: person & influencer, depth: how many levels of friends of friends of frieds i.e.
-        pass
-    def update(self):
-        pass
-    def exportplot(self):
-        pass
-
+##### DATA MANAGER ####
+#
+#class Datamanager:
+#    def savenetwork():
+#        pass
+#    def savecurrenttimestamp():
+#        pass
+#    
+#    
+##### PLOTTER ####
+#        
+#class plotter:
+#    def setupplot():
+#        pass
+#    def drawnodes():
+#        pass
+#    def drawedges(node, depth):     #node: person & influencer, depth: how many levels of friends of friends of frieds i.e.
+#        pass
+#    def update():
+#        pass
+#    def exportplot():
+#        pass
