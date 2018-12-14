@@ -183,7 +183,7 @@ class Network(object):
                 
         else:
             raise Exception("ERROR: UNVALID GENERATE KEY")
-            
+
         self.agentsid=self.gf.nodes
         for a in self.agentsid:
             self.agents.append(self.getobj(a))
@@ -553,6 +553,18 @@ class Simumanager:
 
     def stateofknowngame(self):     #1 Timestamp
         pass
+    def adround(self):
+        for item in Game.games_total:
+            if item is not "Null_Game":         #there wont be an AD for a Non Game
+                item.run_add
+
+    #
+    # def influfriendround(self):
+    #     for person in people_total:
+    #         for friend in person.friends:
+    #             friend
+
+
     def decay(self):
         pass
     def ad(self):
