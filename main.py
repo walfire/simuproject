@@ -13,7 +13,6 @@ import random
 
 #### NETWORK STRUCTURE ####
 
-n=500
 keys=["complex" , "friendly" , "meaning","polish" , "multi", "action", "difficulty", "abstract"]
 
 def getscore(dic1,dic2):
@@ -25,7 +24,7 @@ def getscore(dic1,dic2):
     return sco
 #### NETWORK STRUCTURE ####
 class Network(object):
-    def __init__(self, size=n):
+    def __init__(self, size=500):
         self.size=size
         self.mean=0
         self.sd=0
@@ -351,7 +350,7 @@ class Agent:
         
     def __str__(self):
         return self.node_num
-        
+
     def define_friends(self, friends_list):
         self.friends = friends_list
         
@@ -525,8 +524,6 @@ class Simumanager:
     def __init__(self):
         Simumanager.timeStamp = 0 #init the timestamp to 0 for a new simulation
 
-
-
     def loadsimu(self, timestamp, datafile):
         Simumanager.timeStamp = timestamp
 
@@ -538,8 +535,11 @@ class Simumanager:
         else:                                           #open for extension for non random assignment of budget
             raise ("ERROR: INVALID BUDGET PARAMETER INPUT")
 
-    def networkinit(self):      #Setup
-        pass
+    def networkinit(self,agentsnumber=500,influassignment="random"):      #creates n agents (500 as preset), assigns preferences,
+        Network(agentsnumber)
+        Network.generate()   # using watstro simulation as preset
+        Network.setup(influassignment)  #random, stricttaste, unstricttaste, double keys for influencer init and assignment
+
 
     def networkfillup(self):
         pass    
