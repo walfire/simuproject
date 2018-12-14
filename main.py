@@ -13,7 +13,7 @@ import random
 #### CLASSES ####
 
 #### NETWORK STRUCTURE ####
-
+n = 500
 keys=["complex" , "friendly" , "meaning","polish" , "multi", "action", "difficulty", "abstract"]
 
 def getscore(dic1,dic2):
@@ -25,7 +25,7 @@ def getscore(dic1,dic2):
     return sco
 #### NETWORK STRUCTURE ####
 class Network(object):
-    def __init__(self, size=500):
+    def __init__(self, size=n):
         self.size=size
         self.mean=0
         self.sd=0
@@ -322,7 +322,6 @@ def getcol(a):
     return col[a]
 
 #### AGENTS ####
-
 people_total = [] #list of person objects
 games_total = [] #list of game objects
 games_dict = {0:0} #dictionary of str(game objects)
@@ -441,7 +440,7 @@ class Game:
         Game.game_num += 1
         
     def __str__(self):
-        return self.name
+        return str(self.name)
         
     def get_popularity(self, people=people_total):
         players = 0
@@ -531,29 +530,30 @@ class Simumanager:
 
     def addgames(self,gamesnumber=5, budget="random"):  #create n instances of games, which automatically get added in games_total list
         if budget == "random":
-            budgetamount = random()
+            budgetamount = random.random()
             for i in range(0,gamesnumber):
                 Game(budgetamount)
         else:                                           #open for extension for non random assignment of budget
             raise Exception("ERROR: INVALID BUDGET PARAMETER INPUT")
 
     def networkinit(self,agentsnumber=500,influassignment="random"):      #creates n agents (500 as preset), assigns preferences,
-        Network(agentsnumber)
-        Network.generate()   # using watstro simulation as preset
-        Network.setup(influassignment)  #random, stricttaste, unstricttaste, double keys for influencer init and assignment
+        net = Network(size=agentsnumber)
+        net.generate()   # using watstro simulation as preset
+        net.setup(influassignment)  #random, stricttaste, unstricttaste, double keys for influencer init and assignment
 
-    def drawnetwork(self,timestamp,type="agents"):
+    def drawnetwork(self,type="agents"):
         if type == "agents":
-            Network.draw()
+            self.net.draw()
         if type == "influencers":
-            Network.drawi()
+            self.net.drawi()
         if type == "agents_influencers":
-            Network.niceplot()
+            self.net.niceplot()
         else:
             raise Exception("Error: INVALID TYPE PARAMETER INPUT")
 
     def stateofknowngame(self):     #1 Timestamp
         pass
+    
     def adround(self):
         for item in Game.games_total:
             if item is not "Null_Game":         #there wont be an AD for a Non Game
@@ -586,8 +586,8 @@ class Simumanager:
 
 class Datamanager:          #call it after the network creation, to instantiate a pandas matrix that has the information
                             #about all the agents at timestamp = 0
-    def __init__(self, node_num):
-        self.columns = ["timestamp", "agent ID", "isinfluencer", "current played game", "how long been playing current game", "friends playing the same", "does influencer play the same" ]
+    def __init__(self):
+        self.columns = ["timestamp", "agent ID", "isinfluencer", "current played game", "how long been playing current game", "# friends playing the same", "does influencer play the same"]
         
         if games_total:                 #appends to the index list the names of the played games list
             for game in games_total:
@@ -597,22 +597,44 @@ class Datamanager:          #call it after the network creation, to instantiate 
         self.listofagents = []
         for person in people_total:
             agent = []
-            agent.append(self.timestamp)
+            agent.append(Simumanager.timestamp)
             agent.append(person.node_num)
             agent.append(person.influencer_status)
             agent.append(person.now_playing)
-            agent.append(person.time_playing)       # check on this
+            agent.append(person.time_playing)       # check on thisi
+            agent.append(0) #nr friends playing the same game
+            agent.append(0) #is influ playing the same?
+            for game in games_total:        #TO BE CHECKED IF THE ORDER IS THE SAME OF THE ONE IN THE PANDA DATAFRAME
+                if game.name != "Null_Game":
+                   # agent.append(agent.preferences[game.name])
+                   agent.append("placeholder")
+            self.listofagents.append(agent)
         
-        self.rows = {}
-        
-        
-        self.table = pd.DataFrames(column = self.columns)
+        self.table = pd.DataFrame(data = self.listofagents, columns = self.columns)
 
+    def get_table(self):
+        print (self.table)
+
+
+    def export_table(self):
+        writer = pd.ExcelWriter('Simulation.xlsx', engine='xlsxwriter')
+        self.table.to_excel(writer, sheet_name='Sheet1')
+        writer.save()
+        
+        
     def createtable(self):
         pass
     def savecurrenttimestamp(self):
         pass
 
+
+sim = Simumanager()
+sim.addgames()
+sim.networkinit()
+#sim.drawnetwork()
+data = Datamanager()
+data.get_table()
+data.export_table()
 
 
 
