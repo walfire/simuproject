@@ -187,6 +187,7 @@ class Network(object):
         self.agentsid=self.gf.nodes
         for a in self.agentsid:
             self.agents.append(self.getobj(a))
+            self.getobj(a).define_friends(self.friendsof(a))
             
             
     def setup(self, genway="random"):
@@ -265,7 +266,8 @@ class Network(object):
         self.infdic=infdic
         for a in self.infdic.keys():
             self.getobj(a).define_followers(self.infdic[a])
-
+            for b in self.infdic[b]:
+                self.getobj(b).influencer=self.getobj(a)
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
     def getobj(self,personnr):
@@ -340,6 +342,7 @@ class Agent:
         self.node_num = node_num          #ID of agent
         self.friends = []
         self.followers = []
+        self.influencer = 0
         self.knowngames = {}
         self.preferences = {}
         self.preferences_list=[]
