@@ -22,6 +22,7 @@ def getscore(dic1,dic2):
         sco+=abs(dic1[a]-dic2[a])
     sco=(1-sco/len(keys))*100
     return sco
+
 #### NETWORK STRUCTURE ####
 class Network(object):
     def __init__(self, size=n):
@@ -266,12 +267,15 @@ class Network(object):
         self.infdic=infdic
         for a in self.infdic.keys():
             self.getobj(a).define_followers(self.infdic[a])
-            for b in self.infdic[b]:
+            for b in self.infdic[a]:
                 self.getobj(b).influencer=self.getobj(a)
+                
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
+        
     def getobj(self,personnr):
         return self.gf.nodes[personnr]["obj"]
+    
     def draw(self):
         ax=plt.gca()
         ax.clear()
@@ -280,6 +284,9 @@ class Network(object):
         nx.draw(self.gf,node_size=100,node_color="red")
         
     def drawi(self):
+        ax=plt.gca()
+        ax.clear()
+        fig = plt.gcf()
         nx.draw(self.ginf)
     def addinf(self):
                 ####sketch, can be erased
@@ -289,6 +296,9 @@ class Network(object):
         pass
         #probably output a dic of ags per inf, but also add inf as a trait of ag
     def niceplot(self):
+        ax=plt.gca()
+        ax.clear()
+        fig = plt.gcf()
         toplot=nx.Graph()
         for a in self.agents:
             if a.node_num in self.inf:
@@ -312,7 +322,7 @@ class Network(object):
         coln=[toplot.nodes[u]["col"] for u in nodes]
         size=[toplot.nodes[u]["size"] for u in nodes]
         shape=[toplot.nodes[u]["shape"] for u in nodes]
-        print(colors)
+        #print(colors)
         nx.draw_networkx(toplot, nodes=nodes, node_color= coln, node_size=size, 
                 #node_shape=shape, 
                 edges=edges, edge_color=colors, 
@@ -399,10 +409,12 @@ class Agent:
     
     def recommend(self):
         for i in self.friends:
-            i.influence_playing(self.now_playing,friendship_prob)
+            print(i)
+            newi = i #to be replaced
+            newi.influence_playing(self.now_playing,friendship_prob)
         if self.followers:
-            for i in self.followers:
-                i.influence_playing(self.now_playing,influencer_prob)
+            for j in self.followers:
+                j.influence_playing(self.now_playing,influencer_prob)
         
     def game_infection(self):
         for game in sorted(self.knowngames, key=self.knowngames.get, reverse=True):
@@ -511,19 +523,6 @@ class Simumanager:
     'class that manages the simulation & works with timestamps'
     timestamp = 0   #accessable from in/outside the class
 
-#    def quitsimu(self):
-#        self.window.destroy()
-#        
-#    
-#    window = tk.Tk()                    #GUI of the simumanager
-#    window.title("Simulation Manager")
-#    window.geometry('800x600')
-#    
-#    quitbutton = tk.Button(window, text="Quit", command = quitsimu())
-#    quitbutton.grid(column=100, row=100)
-#    
-#    window.mainloop()
-#
     def __init__(self):
         Simumanager.timestamp = 0 #init the timestamp to 0 for a new simulation
 
@@ -557,7 +556,7 @@ class Simumanager:
         pass
     
     def adround(self):
-        for item in Game.games_total:
+        for item in games_total:
             if item is not "Null_Game":         #there wont be an AD for a Non Game
                 item.run_add
 
@@ -594,9 +593,14 @@ class Datamanager:          #call it after the network creation, to instantiate 
         if games_total:                 #appends to the index list the names of the played games list
             for game in games_total:
                 if game.name != "Null_Game":
-                    self.columns.append("game " + str(game.name) + " preference %")
-        
+                    self.columns.append("game " + str(game.name) + " preference %")     
         self.listofagents = []
+        self.table = pd.DataFrame(data = self.listofagents, columns = self.columns)
+
+    def get_table(self):
+        print (self.table)
+
+    def update_table(self):
         for person in people_total:
             agent = []
             agent.append(Simumanager.timestamp)
@@ -611,16 +615,12 @@ class Datamanager:          #call it after the network creation, to instantiate 
                    # agent.append(agent.preferences[game.name])
                    agent.append("placeholder")
             self.listofagents.append(agent)
-        
+            
         self.table = pd.DataFrame(data = self.listofagents, columns = self.columns)
-
-    def get_table(self):
-        print (self.table)
-
-
+            
     def export_table(self):
         writer = pd.ExcelWriter('Simulation.xlsx', engine='xlsxwriter')
-        self.table.to_excel(writer, sheet_name='Sheet1')
+        self.table.to_excel(writer, sheet_name='Sim')
         writer.save()
         
     def createtable(self):
@@ -636,16 +636,41 @@ class Datamanager:          #call it after the network creation, to instantiate 
 #data = Datamanager()
 #data.get_table()
 #data.export_table()
+       
         
-sim = Simumanager()
-sim.addgames()
-net = Network()
-net.generate()
-net.setup()
-net.draw()
-data = Datamanager()
-data.get_table()
-data.export_table()
+def main(): 
+    print ("START OF SIMULATION \n")
+    sim = Simumanager()
+    sim.addgames()
+    net = Network()
+    net.generate()
+    net.setup()
+    data = Datamanager()
+    rounds = int(input("How many rounds of simulation?      "))
+    for i in range(rounds):
+        print("Timestamp " + str(sim.timestamp))
+        
+        sim.adround()               #influence of ads, influencers and friends & conversion calculated
+        sim.influfriendround()
+        sim.conversion()
+        
+        data.update_table()         #export values in the table
+        data.get_table()
+        data.export_table()
+        
+        
+        net.draw()                  #draw plot
+        
+        
+        if i < (rounds-1):
+            input("Proceed with next step?: ")
+            sim.nextstep()
+        else:
+            print("Simulation finished.")
+        
+    
+if __name__ == "__main__":
+    main()
 
 ##### PLOTTER ####
 #        
