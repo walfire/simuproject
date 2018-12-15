@@ -188,7 +188,13 @@ class Network(object):
         self.agentsid=self.gf.nodes
         for a in self.agentsid:
             self.agents.append(self.getobj(a))
-            self.getobj(a).define_friends(self.friendsof(a))
+            
+            friendsinstances = []
+            for friend in self.friendsof(a):
+                    temp = self.getobj(friend)
+                    friendsinstances.append(temp)
+            self.getobj(a).define_friends(friendsinstances)
+
             
             
     def setup(self, genway="random"):
@@ -409,9 +415,7 @@ class Agent:
     
     def recommend(self):
         for i in self.friends:
-            print(i)
-            newi = i #to be replaced
-            newi.influence_playing(self.now_playing,friendship_prob)
+            i.influence_playing(self.now_playing,friendship_prob)
         if self.followers:
             for j in self.followers:
                 j.influence_playing(self.now_playing,influencer_prob)
@@ -485,6 +489,10 @@ class Game:
         for item in keys:
             if item not in self.scores:
                 self.scores[item] = 0
+    
+#    def find_agent_from_agent_ID(self, agentID):
+#        for agent in people_total:
+#            if agent
     
     def set_decay(self, value=standard_decay):
         self.decay = value
