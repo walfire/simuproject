@@ -286,14 +286,22 @@ class Network(object):
         ax=plt.gca()
         ax.clear()
         fig = plt.gcf()
+        cols=[]
+        for a in list(self.gf.nodes):
+            cols.append(getnodecol(self.getobj(a).now_playing.game_id))
         #fig.set_size_inches(13,20)#    set dimension of window
-        nx.draw(self.gf,node_size=100,node_color="red")
+        nx.draw(self.gf,node_size=100,node_color=cols)
         
     def drawi(self):
         ax=plt.gca()
         ax.clear()
         fig = plt.gcf()
-        nx.draw(self.ginf)
+        temp=nx.create_empty_copy(self.gf)
+        temp.add_edges_from(self.ginf.edges)
+        cols=[]
+        for a in list(self.gf.nodes):
+            cols.append(getnodecol(self.getobj(a).now_playing.game_id))
+        nx.draw(temp, node_colors=cols)
     def addinf(self):
                 ####sketch, can be erased
         #choose numinf randomagents as infs
@@ -313,7 +321,7 @@ class Network(object):
             else:
                 eee="d"
                 aaa=30+5*a.time_playing
-            toplot.add_node(a.node_num,col=a.now_playing,size=1,shape=eee)
+            toplot.add_node(a.node_num,col=getnodecol(a.now_playing.game_id),size=1,shape=eee)
         toplot.add_edges_from(self.gf.edges,col="k",wei=2)
         #for aa in range(len(self.inf)):
          #   a=self.inf[aa]
@@ -337,7 +345,11 @@ class Network(object):
 def getcol(a):
     col=["g","b","y","m","r"]
     return col[a]
-
+def getnodecol(id):
+    trans=["k","r","b","y","m","g"]
+    #apply list to transltate ids into python colours here
+    id=trans[id]
+    return id
 #### AGENTS ####
 people_total = [] #list of person objects
 games_total = [Game(0,real_game=False)] #list of game objects
