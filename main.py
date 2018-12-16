@@ -352,8 +352,7 @@ def getnodecol(id):
     return id
 #### AGENTS ####
 people_total = [] #list of person objects
-games_total = [Game(0,real_game=False)] #list of game objects
-games_dict = {str(games_total[0]):0} #dictionary of str(game objects)
+
 friendship_prob = 0.3
 influencer_prob = 0.3
 advertising_power = 0.3
@@ -375,7 +374,7 @@ class Agent:
         self.knowngames = {}
         self.preferences = {}
         self.preferences_list=[]
-        self.now_playing = games_total[0]
+        self.now_playing = Game.games_total[0]
         self.time_playing = 0
         self.influencer_status = False
         people_total.append(self)
@@ -391,7 +390,7 @@ class Agent:
         self.influencer_status = True
         
     def define_knowngames(self, games_dict):
-        self.knowngames = games_dict.copy()
+        self.knowngames = Game.games_dict.copy()
     
 #    def set_preferences(self,likes:list):
 #        self.preferences_list=likes
@@ -428,16 +427,16 @@ class Agent:
     
     def recommend(self):
         for i in self.friends:
-            i.influence_playing(self.now_playing,friendship_prob)
+            i.influence_playing(str(self.now_playing),friendship_prob)
         if self.followers:
             for j in self.followers:
-                j.influence_playing(self.now_playing,influencer_prob)
+                j.influence_playing(str(self.now_playing),influencer_prob)
         
     def game_infection(self):
         for game in sorted(self.knowngames, key=self.knowngames.get, reverse=True):
             prob=self.knowngames[game] 
             if random.choice([0,1],[1-prob,prob]):
-                game_obj = games_total[game]
+                game_obj = Game.games_total[game]
                 if game_obj.real_game:
                     self.now_playing = game_obj
                     self.time_playing +=1
@@ -460,6 +459,8 @@ class Game:
 #    target = 0.0 #niche - mainstream
 #    team = ["indie","blockbuster"] #optional?
     game_num = 0
+    games_total = [] #list of game objects
+    games_dict = {} #dictionary of str(game objects)
     def __init__(self, budget, name = game_num, game_id= game_num, decay = 0, genre = 0, scores = [], real_game = True):
         self.name = name
         self.budget = budget
@@ -470,8 +471,8 @@ class Game:
         self.game_id = game_id
         self.real_game = real_game
         if real_game:
-            games_total.append(self)
-        games_dict[str(self)]=0
+            Game.games_total.append(self)
+        Game.games_dict[str(self)]=0
         Game.game_num += 1
         
     def __str__(self):
@@ -533,13 +534,13 @@ class Conversionalgo:
     #         person.game_infection()
     
     def get_currentstatus(self):
-        for item in games_total:
+        for item in Game.games_total:
             self.currentstatus[str(item)] = item.get_totalplayers()
         self.status_per_step[self.counter] = self.currentstatus
         self.counter += 1
         
     def get_deltas(self):
-        for item in games_total:
+        for item in Game.games_total:
             self.deltas[str(item)] = self.status_per_step[self.counter][str(item)] - self.status_per_step[self.counter-1][str(item)] 
     #more?
 
@@ -559,6 +560,9 @@ class Simumanager:
         Simumanager.timestamp = timestamp
 
     def addgames(self,gamesnumber=5, budget="random"):  #create n instances of games, which automatically get added in games_total list
+        game_zero = Game(0,real_game=False)
+        Game.games_total.append(game_zero)
+        Game.games_dict[str(game_zero)]=0
         if budget == "random":
             budgetamount = comparison_budget*2*random.random()
             for i in range(0,gamesnumber):
@@ -589,8 +593,8 @@ class Simumanager:
         pass
     
     def adround(self):
-        for item in games_total:
-            if item is not "Null_Game":         #there wont be an AD for a Non Game
+        for item in Game.games_total:
+            if item.real_game:         #there wont be an AD for a Non Game
                 item.run_add
 
     def influfriendround(self):
@@ -623,8 +627,8 @@ class Datamanager:          #call it after the network creation, to instantiate 
     def __init__(self):
         self.columns = ["timestamp", "agent ID", "isinfluencer", "current played game", "how long been playing current game", "# friends playing the same", "does influencer play the same"]
         
-        if games_total:                 #appends to the index list the names of the played games list
-            for game in games_total:
+        if Game.games_total:                 #appends to the index list the names of the played games list
+            for game in Game.games_total:
                 if game.real_game:
                     self.columns.append("game " + str(game.name) + " preference %")     
         self.listofagents = []
@@ -643,7 +647,7 @@ class Datamanager:          #call it after the network creation, to instantiate 
             agent.append(person.time_playing)       # check on thisi
             agent.append(0) #nr friends playing the same game
             agent.append(0) #is influ playing the same?
-            for game in games_total:        #TO BE CHECKED IF THE ORDER IS THE SAME OF THE ONE IN THE PANDA DATAFRAME
+            for game in Game.games_total:        #TO BE CHECKED IF THE ORDER IS THE SAME OF THE ONE IN THE PANDA DATAFRAME
                 if game.real_game:
                    # agent.append(agent.preferences[game.name])
                    agent.append("placeholder")
