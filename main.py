@@ -302,6 +302,7 @@ class Network(object):
 #                    friendsinstances.append(temp)
 #            self.getobj(a).define_friends(friendsinstances)                
 
+
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
         
@@ -312,14 +313,23 @@ class Network(object):
         ax=plt.gca()
         ax.clear()
         fig = plt.gcf()
+        cols=[]
+        for a in list(self.gf.nodes):
+            cols.append(getnodecol(self.getobj(a).now_playing.game_id))
         #fig.set_size_inches(13,20)#    set dimension of window
-        nx.draw(self.gf,node_size=100,node_color="red")
+        nx.draw(self.gf,node_size=100,node_color=cols)
         
     def drawi(self):
         ax=plt.gca()
         ax.clear()
         fig = plt.gcf()
-        nx.draw(self.ginf)
+
+        temp=nx.create_empty_copy(self.gf)
+        temp.add_edges_from(self.ginf.edges)
+        cols=[]
+        for a in list(self.gf.nodes):
+            cols.append(getnodecol(self.getobj(a).now_playing.game_id))
+        nx.draw(temp, node_colors=cols)
     def addinf(self):
                 ####sketch, can be erased
         #choose numinf randomagents as infs
@@ -338,8 +348,10 @@ class Network(object):
                 aaa=100+10*a.played_games[a.now_playing]#update time playing with self.played_games[self.now_playing]
             else:
                 eee="d"
+
                 aaa=30+5*a.played_games[a.now_playing]
-            toplot.add_node(a.node_num,col=a.now_playing,size=1,shape=eee)
+            toplot.add_node(a.node_num,col=getnodecol(a.now_playing.game_id),size=1,shape=eee)
+            
         toplot.add_edges_from(self.gf.edges,col="k",wei=2)
         #for aa in range(len(self.inf)):
          #   a=self.inf[aa]
@@ -363,7 +375,11 @@ class Network(object):
 def getcol(a):
     col=["g","b","y","m","r"]
     return col[a]
-
+def getnodecol(id):
+    trans=["k","r","b","y","m","g"]
+    #apply list to transltate ids into python colours here
+    id=trans[id]
+    return id
 #### AGENTS ####
 people_total = [] #list of person objects
 influencers_total = []
@@ -451,9 +467,11 @@ class Agent:
         for friend in self.friends:
             friend.influence_playing(self.now_playing,friendship_prob)
         if self.followers:
+
             for follower in self.followers:
                 follower.influence_playing(self.now_playing,influencer_prob)
             
+
     def game_infection(self):
         
         #print (self.knowngames)
@@ -538,8 +556,10 @@ class Game:
 #        for agent in people_total:
 #            if agent
     
+
 #    def set_decay(self, value=standard_decay):
 #        self.decay = value
+
 
     
     
@@ -614,6 +634,7 @@ class Simumanager:
                 runadd = input("Ad for game " + str(game.name) + "? \n give a nonempty input to run an add          ")
                 if runadd:
                     game.run_add()
+
 
     def influfriendround(self):
         print("influencer & friends effect")
@@ -720,6 +741,7 @@ def main():
     net.generate()
     net.setup()
     data = Datamanager()
+
     #print ("Table:\n \n")
     #data.get_table()
     rounds = int(input("How many rounds of simulation?      "))
@@ -727,12 +749,14 @@ def main():
         global timestamp
         print("Timestamp " + str(timestamp))
         
+
         
         sim.adround()               #influence of ads, influencers and friends & conversion calculated
         sim.influfriendround()
         sim.conversion()
         
         data.update_table()         #export values in the table
+
         #data.get_table()
         data.export_table()
         
@@ -740,6 +764,7 @@ def main():
         
         
 #        net.draw()                  #draw plot
+
         
         
         if i < (rounds-1):
