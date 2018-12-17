@@ -21,7 +21,7 @@ def getscore(dic1,dic2):
     sco=0
     for a in keys:
         sco+=abs(dic1[a]-dic2[a])
-    sco=(1-sco/len(keys))*100
+    sco=(1-sco/len(keys))
     return sco
 
 #### NETWORK STRUCTURE ####
@@ -43,6 +43,7 @@ class Network(object):
         self.numinf=10
         self.infdic={}
         self.infobj=[]
+        self.pos=0
         
     def generate(self,meanfriends=5, sdfriends=5, frienddist="uni",connectdist="watstro"):
                 #generates object and the f network
@@ -195,6 +196,7 @@ class Network(object):
                     temp = self.getobj(friend)
                     friendsinstances.append(temp)
             self.getobj(a).define_friends(friendsinstances)
+        self.pos = nx.spring_layout(self.gf)
 
             
             
@@ -277,6 +279,7 @@ class Network(object):
         
         for influencer in self.infdic:
             influencers_total.append(self.getobj(influencer))
+            self.inf.append(influencer)
         
         for influencer in self.infdic:
             followerinstances = []
@@ -315,9 +318,9 @@ class Network(object):
         fig = plt.gcf()
         cols=[]
         for a in list(self.gf.nodes):
-            cols.append(getnodecol(self.getobj(a).now_playing.game_id))     #lets clear this one up later
-        #fig.set_size_inches(13,20)#    set dimension of window
-        nx.draw(self.gf,node_size=100,node_color=cols)
+            cols.append(getnodecol(int(self.getobj(a).now_playing)))     #lets clear this one up later
+        fig.set_size_inches(60,60)#    set dimension of window
+        nx.draw(self.gf,self.pos, node_size=100,node_color=cols)
         
     def drawi(self):
         ax=plt.gca()
@@ -341,16 +344,19 @@ class Network(object):
         ax=plt.gca()
         ax.clear()
         fig = plt.gcf()
+        fig.set_size_inches(30,30)
         toplot=nx.Graph()
+        #print(self.inf)
         for a in self.agents:
             if a.node_num in self.inf:
-                eee="d"
-                aaa=100+10*a.played_games[a.now_playing]#update time playing with self.played_games[self.now_playing]
+                eee="s"
+                #print(a.now_playing)
+                aaa=3500#+10*a.played_games[a.now_playing]#update time playing with self.played_games[self.now_playing]
             else:
-                eee="d"
-
-                aaa=30+5*a.played_games[a.now_playing]
-            toplot.add_node(a.node_num,col=getnodecol(a.now_playing.game_id),size=1,shape=eee)
+                eee="^"
+                #print(a.now_playing)
+                aaa=1500#+5*a.played_games[a.now_playing]
+            toplot.add_node(a.node_num,col=getnodecol(int(a.now_playing)),size=aaa,shape=eee)
             
         toplot.add_edges_from(self.gf.edges,col="k",wei=2)
         #for aa in range(len(self.inf)):
@@ -361,22 +367,32 @@ class Network(object):
         
         edges=toplot.edges
         nodes=toplot.nodes
+        #print(self.inf)
         colors = [toplot[u][v]['col'] for u,v in edges]
         wei = [toplot[u][v]['wei'] for u,v in edges]
         coln=[toplot.nodes[u]["col"] for u in nodes]
         size=[toplot.nodes[u]["size"] for u in nodes]
-        shape=[toplot.nodes[u]["shape"] for u in nodes]
+        #print(size)
+        print([nodes[x] for x in self.inf])
+         #shape=[toplot.nodes[u]["shape"] for u in nodes]
         #print(colors)
-        nx.draw_networkx(toplot, nodes=nodes, node_color= coln, node_size=size, 
-                #node_shape=shape, 
+        nx.draw_networkx(toplot, self.pos, nodes=nodes, node_color= coln, node_size=size, 
+                #node_shape="d",
+                with_labels=False,
                 edges=edges, edge_color=colors, 
                 width=wei
                 )
+        #nx.draw_networkx_nodes(toplot, self.pos, nodes=[nodes[x] for x in self.inf], node_color=[coln[x] for x in self.inf], node_size=2500, 
+         #       node_shape="d",
+          #      with_labels=False,
+                #edges=edges, edge_color=colors, 
+                #width=wei
+           #     )
 def getcol(a):
     col=["g","b","y","m","r"]
     return col[a]
 def getnodecol(id):
-    trans=["k","r","b","y","m","g"]
+    trans=["k","r","b","y","m","g","olive","lightpink"]
     #apply list to transltate ids into python colours here
     id=trans[id]
     return id
@@ -388,7 +404,7 @@ games_dict = {0:0} #dictionary of str(game objects)
 friendship_prob = 0.2
 influencer_prob = 0.15
 advertising_power = 0.1
-standard_decay = -0.05
+standard_decay = -0.15
 decay_multiplier =0.2
 comparison_budget = 0.5
 
@@ -452,11 +468,14 @@ class Agent:
     def get_preferences(self):
         return self.preferences
     
-    def influence_playing(self,key,prob):       #key is the knowngame name
+    def influence_playing(self,key,prob,bo=0):       #key is the knowngame name
         if key!= "0":
             #print("game with name:" + key)
             newprob = self.knowngames[key]
-            newprob += prob
+            if bo==1:
+                newprob+=prob
+            else:
+                newprob += prob*getscore(games_total[int(key)].scores,self.preferences)
             self.knowngames[key] = newprob
             #print(self.knowngames)
     
@@ -490,7 +509,8 @@ class Agent:
                     temp += 1
                     self.played_games[dictval] = temp
 #                if self.played_games and dictval not in self.played_games:
-                self.played_games[self.now_playing] = 0         #initializes the game with 1 timestamp played
+                else:     
+                    self.played_games[self.now_playing] = 0         #initializes the game with 1 timestamp played
                 break
             else:
                 del temp[dictval]   #erases the highest value item from the temporary dict
@@ -498,15 +518,15 @@ class Agent:
             
     def decay_effect(self):
         if self.now_playing != "0":
-            disinterest =self.played_games[self.now_playing]*standard_decay       #a bit hardcoded, does not look for the decay value of the single game, rather uses the standard decay directly!!
-            self.influence_playing(self.now_playing, disinterest)
+            disinterest =self.played_games[self.now_playing]**2*standard_decay       #a bit hardcoded, does not look for the decay value of the single game, rather uses the standard decay directly!!
+            self.influence_playing(self.now_playing, disinterest,bo=1)
 
   
 class Game:
 
     game_num = 0
     
-    def __init__(self, budget, name = game_num, game_id = game_num, decay = 0, genre = 0, scores = []):
+    def __init__(self, budget, name = game_num, game_id = game_num, decay = 0, genre = 0, scores = {}):
         self.name = str(Game.game_num)
         self.budget = budget
         self.decay = standard_decay
@@ -601,10 +621,18 @@ class Simumanager:
 #        timestamp = timestamp
 
     def addgames(self,gamesnumber=5, budget="random"):  #create n instances of games, which automatically get added in games_total list
+        pref={}
+        for a in keys:
+            pref[a]=0
+         
         if budget == "random":
             budgetamount = random.random()
             for i in range(0,gamesnumber):
-                Game(budgetamount)
+                
+                dic=pref
+                for b in keys:
+                    dic[b]=rng.random()
+                Game(budgetamount,scores=dic)
         else:                                           #open for extension for non random assignment of budget
             raise Exception("ERROR: INVALID BUDGET PARAMETER INPUT")
 
@@ -631,7 +659,8 @@ class Simumanager:
         for game in games_total:
            # print(game.name)
             if game.name !="0":         #there wont be an AD for a Non Game
-                runadd = input("Ad for game " + str(game.name) + "? \n give a nonempty input to run an add          ")
+#                runadd = input("Ad for game " + str(game.name) + "? \n give a nonempty input to run an add          ")
+                runadd = 1
                 if runadd:
                     game.run_add()
 
@@ -736,7 +765,7 @@ class Datamanager:          #call it after the network creation, to instantiate 
 def main(): 
     print ("START OF SIMULATION \n")
     sim = Simumanager()
-    sim.addgames()
+    sim.addgames(8)
     net = Network()
     net.generate()
     net.setup()
@@ -750,8 +779,8 @@ def main():
         print("Timestamp " + str(timestamp))
         
 
-        
-        sim.adround()               #influence of ads, influencers and friends & conversion calculated
+        if i == 0:       
+            sim.adround()               #influence of ads, influencers and friends & conversion calculated
         sim.influfriendround()
         sim.conversion()
         
@@ -763,12 +792,13 @@ def main():
         sim.decay()
         
         
-#        net.draw()                  #draw plot
-
+        net.niceplot()                  #draw plot
+        pic=plt.gcf()
+        pic.savefig(str(timestamp)+".png")
         
         
         if i < (rounds-1):
-            input("Proceed with next step?: ")
+#            input("Proceed with next step?: ")
             timestamp += 1
         else:
             print("Simulation finished.")
