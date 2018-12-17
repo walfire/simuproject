@@ -7,12 +7,13 @@ import networkx as nx
 import numpy.random as rng
 import pandas as pd
 import random
+import operator
 
 
 #### CLASSES ####
 
 #### NETWORK STRUCTURE ####
-n = 500
+n = 50
 keys=["complex" , "friendly" , "meaning","polish" , "multi", "action", "difficulty", "abstract"]
 
 def getscore(dic1,dic2):
@@ -269,13 +270,39 @@ class Network(object):
                         sco=s
             infdic[inf[nu]].append(a)
             self.ginf.add_edge(a,inf[nu])
+            
         #puts the inf stuff into a usable form
+       
         self.infdic=infdic
-        for a in self.infdic.keys():
-            self.getobj(a).define_followers(self.infdic[a])
-            for b in self.infdic[a]:
-                self.getobj(b).influencer=self.getobj(a)
+        
+        for influencer in self.infdic:
+            influencers_total.append(self.getobj(influencer))
+        
+        for influencer in self.infdic:
+            followerinstances = []
+            for follower in infdic[influencer]:     
+                temp = self.getobj(follower)
+                followerinstances.append(temp)
+            
+            self.getobj(influencer).define_followers(followerinstances)   
+            
+#        for a in self.infdic.keys():       #old version
+#            self.getobj(a).define_followers(self.infdic[a])
+#            for b in self.infdic[a]:
+#                self.getobj(b).influencer=self.getobj(a)
                 
+                
+#        self.agentsid=self.gf.nodes
+#        for a in self.agentsid:
+#            self.agents.append(self.getobj(a))
+#            
+#            friendsinstances = []
+#            for friend in self.friendsof(a):
+#                    temp = self.getobj(friend)
+#                    friendsinstances.append(temp)
+#            self.getobj(a).define_friends(friendsinstances)                
+
+
     def friendsof(self,personnr):
         return(list(self.gf[personnr]))
         
@@ -288,7 +315,7 @@ class Network(object):
         fig = plt.gcf()
         cols=[]
         for a in list(self.gf.nodes):
-            cols.append(getnodecol(self.getobj(a).now_playing.game_id))
+            cols.append(getnodecol(self.getobj(a).now_playing.game_id))     #lets clear this one up later
         #fig.set_size_inches(13,20)#    set dimension of window
         nx.draw(self.gf,node_size=100,node_color=cols)
         
@@ -296,6 +323,7 @@ class Network(object):
         ax=plt.gca()
         ax.clear()
         fig = plt.gcf()
+
         temp=nx.create_empty_copy(self.gf)
         temp.add_edges_from(self.ginf.edges)
         cols=[]
@@ -317,11 +345,13 @@ class Network(object):
         for a in self.agents:
             if a.node_num in self.inf:
                 eee="d"
-                aaa=100+10*a.time_playing
+                aaa=100+10*a.played_games[a.now_playing]#update time playing with self.played_games[self.now_playing]
             else:
                 eee="d"
-                aaa=30+5*a.time_playing
+
+                aaa=30+5*a.played_games[a.now_playing]
             toplot.add_node(a.node_num,col=getnodecol(a.now_playing.game_id),size=1,shape=eee)
+            
         toplot.add_edges_from(self.gf.edges,col="k",wei=2)
         #for aa in range(len(self.inf)):
          #   a=self.inf[aa]
@@ -352,14 +382,15 @@ def getnodecol(id):
     return id
 #### AGENTS ####
 people_total = [] #list of person objects
-
-friendship_prob = 0.3
-influencer_prob = 0.3
-advertising_power = 0.3
-standard_decay = -0.3
+influencers_total = []
+games_total = [] #list of game objects
+games_dict = {0:0} #dictionary of str(game objects)
+friendship_prob = 0.2
+influencer_prob = 0.15
+advertising_power = 0.1
+standard_decay = -0.05
 decay_multiplier =0.2
-comparison_budget = 1000
-budget_range = 0.5
+comparison_budget = 0.5
 
 likes = ['singleplayer', 'multiplayer', 'casual', 'replayable', 'rpg']
 genres = ['fps', 'puzzle', 'strategy', 'platformer', 'sim']
@@ -369,15 +400,18 @@ class Agent:
     def __init__(self,node_num):
         self.node_num = node_num          #ID of agent
         self.friends = []
+        self.played_games = {} #key:name of game, value:nr of times played
         self.followers = []
         self.influencer = 0
         self.knowngames = {}
         self.preferences = {}
         self.preferences_list=[]
-        self.now_playing = Game.games_total[0]
+        self.now_playing = "0"       #player initialized as playing the "0" game, the NUll game dummy
         self.time_playing = 0
         self.influencer_status = False
         people_total.append(self)
+        for game in games_total:
+            self.knowngames[game.name]= 0           #fills up the preference list of the agent with all the known games
         
     def __str__(self):
         return self.node_num
@@ -389,8 +423,8 @@ class Agent:
         self.followers.extend(followers_list)
         self.influencer_status = True
         
-    def define_knowngames(self, games_dict):
-        self.knowngames = Game.games_dict.copy()
+#    def define_knowngames(self, games_dict):
+#        self.knowngames = games_dict.copy()
     
 #    def set_preferences(self,likes:list):
 #        self.preferences_list=likes
@@ -418,61 +452,70 @@ class Agent:
     def get_preferences(self):
         return self.preferences
     
-    def influence_playing(self,key,prob):
-        self.knowngames[key] += prob
+    def influence_playing(self,key,prob):       #key is the knowngame name
+        if key!= "0":
+            #print("game with name:" + key)
+            newprob = self.knowngames[key]
+            newprob += prob
+            self.knowngames[key] = newprob
+            #print(self.knowngames)
     
     def decay_playing(self):
-        #if statt {0:0}
-        self.knowngames[str(self.now_playing)] += standard_decay
+        self.knowngames[self.now_playing] += standard_decay
     
     def recommend(self):
-        for i in self.friends:
-            i.influence_playing(str(self.now_playing),friendship_prob)
+        for friend in self.friends:
+            friend.influence_playing(self.now_playing,friendship_prob)
         if self.followers:
-            for j in self.followers:
-                j.influence_playing(str(self.now_playing),influencer_prob)
-        
+
+            for follower in self.followers:
+                follower.influence_playing(self.now_playing,influencer_prob)
+            
+
     def game_infection(self):
-        for game in sorted(self.knowngames, key=self.knowngames.get, reverse=True):
-            prob=self.knowngames[game] 
-            if random.choice([0,1],[1-prob,prob]):
-                game_obj = Game.games_total[game]
-                if game_obj.real_game:
-                    self.now_playing = game_obj
-                    self.time_playing +=1
-                #return True
+        
+        #print (self.knowngames)
+        temp = self.knowngames.copy()          #copy of the known games dictionary
+        del temp["0"]           #exclude the Null game from the temp dictionary
+#        print (temp)
+        while temp:         #as long as the temporary dictionary is non empty
+            dictval = max(temp, key=temp.get) #finds the highest key
+#            if dictval in self.played_games:            #do not want to play twice the same game
+#                del temp[dictval]
+#                continue
+            if random.random() < temp[dictval]:
+                self.now_playing = dictval      #dictval is the name of the played game
+                if dictval in self.played_games:     #if already played, add of 1 the value
+                    temp = self.played_games[dictval]
+                    temp += 1
+                    self.played_games[dictval] = temp
+#                if self.played_games and dictval not in self.played_games:
+                self.played_games[self.now_playing] = 0         #initializes the game with 1 timestamp played
                 break
-    
-#    def decay_effect(self):
-#        if self.now_playing:
-#            disinterest =self.time_playing*self.now_playing
-#            self.influence_playing(self.now_playing, disinterest)
+            else:
+                del temp[dictval]   #erases the highest value item from the temporary dict
+       # print (self.knowngames)
+            
+    def decay_effect(self):
+        if self.now_playing != "0":
+            disinterest =self.played_games[self.now_playing]*standard_decay       #a bit hardcoded, does not look for the decay value of the single game, rather uses the standard decay directly!!
+            self.influence_playing(self.now_playing, disinterest)
 
   
 class Game:
-#    decay = 0
-#    popularity = 0.0
-#    budget = 0.0
-#    multiplayer = 0.0
-#    singleplayer = 0.0
-#    mainstream = 0.0
-#    target = 0.0 #niche - mainstream
-#    team = ["indie","blockbuster"] #optional?
+
     game_num = 0
-    games_total = [] #list of game objects
-    games_dict = {} #dictionary of str(game objects)
-    def __init__(self, budget, name = game_num, game_id= game_num, decay = 0, genre = 0, scores = [], real_game = True):
-        self.name = name
+    
+    def __init__(self, budget, name = game_num, game_id = game_num, decay = 0, genre = 0, scores = []):
+        self.name = str(Game.game_num)
         self.budget = budget
-        self.decay = decay
+        self.decay = standard_decay
         self.genre = genre
         self.scores = scores
         self.effect = advertising_power*self.budget/comparison_budget
         self.game_id = game_id
-        self.real_game = real_game
-        if real_game:
-            Game.games_total.append(self)
-        Game.games_dict[str(self)]=0
+        games_total.append(self)
+        games_dict[str(self)]=0
         Game.game_num += 1
         
     def __str__(self):
@@ -494,8 +537,9 @@ class Game:
         return players
     
     def run_add(self, people=people_total):
-        for i in people:
-            i.influence_playing(self.game, self.effect)
+        print(self.name)
+        for person in people:
+            person.influence_playing(self.name, self.effect)
     
 
     def define_scores(self, keys=likes, scores_list=[], scores_dic={}):
@@ -512,8 +556,10 @@ class Game:
 #        for agent in people_total:
 #            if agent
     
-    def set_decay(self, value=standard_decay):
-        self.decay = value
+
+#    def set_decay(self, value=standard_decay):
+#        self.decay = value
+
 
     
     
@@ -523,7 +569,6 @@ class Conversionalgo:
     def __init__(self, step_num=0):
         self.counter = step_num
         self.currentstatus = {}
-        self.status_per_step = {}
         
     # def implement_influence(self):        #commented out because now in simumanager
     #     for item in games_total:
@@ -534,41 +579,30 @@ class Conversionalgo:
     #         person.game_infection()
     
     def get_currentstatus(self):
-        for item in Game.games_total:
+        for item in games_total:
             self.currentstatus[str(item)] = item.get_totalplayers()
-        self.status_per_step[self.counter] = self.currentstatus
-        self.counter += 1
         
     def get_deltas(self):
-        for item in Game.games_total:
-            self.deltas[str(item)] = self.status_per_step[self.counter][str(item)] - self.status_per_step[self.counter-1][str(item)] 
+        pass
     #more?
 
 #### SIMULATION MANAGER ####
 
-#https://www.tutorialspoint.com/python/python_classes_objects.htm
-#https://likegeeks.com/python-gui-examples-tkinter-tutorial/
+timestamp = 0
 
 class Simumanager:
     'class that manages the simulation & works with timestamps'
-    timestamp = 0   #accessable from in/outside the class
 
     def __init__(self):
-        Simumanager.timestamp = 0 #init the timestamp to 0 for a new simulation
+        global timestamp 
+        timestamp = 0            #init the timestamp to 0 for a new simulation
 
-    def loadsimu(self, timestamp, datafile):
-        Simumanager.timestamp = timestamp
+#    def loadsimu(self, timestamp, datafile):
+#        timestamp = timestamp
 
     def addgames(self,gamesnumber=5, budget="random"):  #create n instances of games, which automatically get added in games_total list
-        game_zero = Game(0,real_game=False)
-        Game.games_total.append(game_zero)
-        Game.games_dict[str(game_zero)]=0
         if budget == "random":
-            budgetamount = comparison_budget*2*random.random()
-            for i in range(0,gamesnumber):
-                Game(budgetamount)
-        elif budget == "range":
-            budgetamount = random.randrange(comparison_budget*(1-budget_range), comparison_budget(1+budget_range))
+            budgetamount = random.random()
             for i in range(0,gamesnumber):
                 Game(budgetamount)
         else:                                           #open for extension for non random assignment of budget
@@ -593,15 +627,22 @@ class Simumanager:
         pass
     
     def adround(self):
-        for item in Game.games_total:
-            if item.real_game:         #there wont be an AD for a Non Game
-                item.run_add
+        print("adround")
+        for game in games_total:
+           # print(game.name)
+            if game.name !="0":         #there wont be an AD for a Non Game
+                runadd = input("Ad for game " + str(game.name) + "? \n give a nonempty input to run an add          ")
+                if runadd:
+                    game.run_add()
+
 
     def influfriendround(self):
+        print("influencer & friends effect")
         for person in people_total:
             person.recommend()          #includes friend influence over other friends, and influencers influence
 
     def conversion(self):               #decides which game gets played
+        print("conversion")
         for person in people_total:
             person.game_infection()
 
@@ -615,10 +656,13 @@ class Simumanager:
         pass
 
     def decay(self):
-        pass
+        print("decay")
+        for person in people_total:
+            person.decay_effect()
 
     def nextstep(self):             #increases timestamp of simulation by 1
-        self.timestamp +=1
+        global timestamp 
+        timestamp += 1
 
 ##### DATA MANAGER ####
 
@@ -627,9 +671,9 @@ class Datamanager:          #call it after the network creation, to instantiate 
     def __init__(self):
         self.columns = ["timestamp", "agent ID", "isinfluencer", "current played game", "how long been playing current game", "# friends playing the same", "does influencer play the same"]
         
-        if Game.games_total:                 #appends to the index list the names of the played games list
-            for game in Game.games_total:
-                if game.real_game:
+        if games_total:                 #appends to the index list the names of the played games list
+            for game in games_total:
+                if game.name != "0":
                     self.columns.append("game " + str(game.name) + " preference %")     
         self.listofagents = []
         self.table = pd.DataFrame(data = self.listofagents, columns = self.columns)
@@ -638,19 +682,33 @@ class Datamanager:          #call it after the network creation, to instantiate 
         print (self.table)
 
     def update_table(self):
+        print("update")
         for person in people_total:
             agent = []
-            agent.append(Simumanager.timestamp)
-            agent.append(person.node_num)
-            agent.append(person.influencer_status)
+            agent.append(timestamp)             #timestamp of simulation
+            agent.append(person.node_num)       #id
+            agent.append(int(person.influencer_status))     #1 if influencer
             agent.append(person.now_playing)
-            agent.append(person.time_playing)       # check on thisi
-            agent.append(0) #nr friends playing the same game
-            agent.append(0) #is influ playing the same?
-            for game in Game.games_total:        #TO BE CHECKED IF THE ORDER IS THE SAME OF THE ONE IN THE PANDA DATAFRAME
-                if game.real_game:
-                   # agent.append(agent.preferences[game.name])
-                   agent.append("placeholder")
+            if person.now_playing != "0":
+                agent.append(person.played_games[person.now_playing])       # how long been playing 
+            else: agent.append(0)
+            amount = 0
+            for friend in person.friends:
+                if friend.now_playing == person.now_playing:
+                    amount += 1
+            agent.append(amount) #nr friends playing the same game
+            
+            isalsoplaying = 0
+            for influencer in influencers_total:
+                if person in influencer.followers:
+                    if person.now_playing == influencer.now_playing:  
+                        isalsoplaying = 1                       
+            agent.append(isalsoplaying) #is influ playing the same?
+            
+            for game in games_total:        
+                if game.name != "0":
+                    agent.append(person.knowngames[game.name])
+                    #agent.append("placeholder")
             self.listofagents.append(agent)
             
         self.table = pd.DataFrame(data = self.listofagents, columns = self.columns)
@@ -683,25 +741,35 @@ def main():
     net.generate()
     net.setup()
     data = Datamanager()
+
+    #print ("Table:\n \n")
+    #data.get_table()
     rounds = int(input("How many rounds of simulation?      "))
     for i in range(rounds):
-        print("Timestamp " + str(sim.timestamp))
+        global timestamp
+        print("Timestamp " + str(timestamp))
+        
+
         
         sim.adround()               #influence of ads, influencers and friends & conversion calculated
         sim.influfriendround()
         sim.conversion()
         
         data.update_table()         #export values in the table
-        data.get_table()
+
+        #data.get_table()
         data.export_table()
         
+        sim.decay()
         
-        net.draw()                  #draw plot
+        
+#        net.draw()                  #draw plot
+
         
         
         if i < (rounds-1):
             input("Proceed with next step?: ")
-            sim.nextstep()
+            timestamp += 1
         else:
             print("Simulation finished.")
         
