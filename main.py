@@ -315,7 +315,7 @@ class Network(object):
         fig = plt.gcf()
         cols=[]
         for a in list(self.gf.nodes):
-            cols.append(getnodecol(self.getobj(a).now_playing.game_id))
+            cols.append(getnodecol(self.getobj(a).now_playing.game_id))     #lets clear this one up later
         #fig.set_size_inches(13,20)#    set dimension of window
         nx.draw(self.gf,node_size=100,node_color=cols)
         
